@@ -1,0 +1,15 @@
+node_modules
+.next
+.env.local
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
+
+# Сборка адаптера Cloudflare
+.open-next
+.wrangler
+cloudflare-env.d.ts
+
+# Локальные переменные воркера. Реальные значения задаются в панели
+# Cloudflare, а не здесь.
+.dev.vars

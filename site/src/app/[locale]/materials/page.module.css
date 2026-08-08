@@ -1,0 +1,11 @@
+.wrap{max-width:1280px;margin:0 auto;padding:120px 40px 110px}
+.h1{font-weight:600;font-size:clamp(30px,5vw,54px);letter-spacing:-.015em;
+  text-transform:uppercase;margin:0 0 44px;line-height:1.06}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:2px}
+.mc{display:flex;flex-direction:column;overflow:hidden;text-decoration:none;color:inherit}
+.cov{aspect-ratio:3/2}
+.bd{padding:20px 20px 22px;display:flex;flex-direction:column;flex:1}
+.title{font-weight:500;font-size:17px;margin:11px 0 0;line-height:1.34;letter-spacing:-.004em}
+.when{margin-top:auto;padding-top:16px;font-size:11.5px;color:var(--dim)}
+.empty{color:var(--dimmer);font-size:13px}
+@media(max-width:860px){.wrap{padding:110px 20px 90px}}

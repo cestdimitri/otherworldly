@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>По-ту-сторонний — низкодетальные вайрфреймы</title>
+<style>
+  :root{
+    /* доска управления — всегда тёмная */
+    --bg:#0d0d0f; --panel:#141417; --line:#2a2a30; --line2:#3a3a44;
+    --ink:#e8e8ea; --dim:#8a8a94; --dimmer:#74747e; --accent:#b0a8f0;
+    --on-accent:#0d0d0f; --box:#1c1c21; --hatch1:#1c1c21; --hatch2:#191920;
+    --w-body:400; --w-disp:700; --track:0; --lh:1.5;
+    --mono: ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  /* ── ДВА МИРА — переопределяются только внутри холста ── */
+  .canvas[data-world="other"]{
+    --panel:#0d0d0f; --box:#141417; --line:#2a2a30; --line2:#3a3a44;
+    --ink:#e8e8ea; --dim:#8a8a94; --dimmer:#74747e;
+    --accent:#b0a8f0; --on-accent:#0d0d0f;
+    --hatch1:#1c1c21; --hatch2:#191920;
+    --w-body:300; --w-disp:500; --track:.02em; --lh:1.62;
+  }
+  .canvas[data-world="real"]{
+    --panel:#e4e4e4; --box:#ededed; --line:#c2c2c4; --line2:#a8a8ac;
+    --ink:#141416; --dim:#4e4e56; --dimmer:#6e6e78;
+    --accent:#4a3fa8; --on-accent:#ffffff;
+    --hatch1:#dcdcdc; --hatch2:#e4e4e4;
+    --w-body:400; --w-disp:700; --track:0; --lh:1.5;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:13px/1.5 var(--mono);-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .wrap{max-width:1240px;margin:0 auto;padding:28px 20px 80px}
+
+  /* ── доска управления ── */
+  h1{font-size:15px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin:0 0 4px}
+  .sub{color:var(--dim);margin:0 0 22px;max-width:70ch;line-height:1.6}
+  .bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .bar.pages{margin-bottom:22px}
+  button{font:inherit;background:var(--panel);color:var(--dim);border:1px solid var(--line);
+    padding:8px 14px;cursor:pointer;letter-spacing:.04em;transition:.12s}
+  button:hover{border-color:var(--line2);color:var(--ink)}
+  button.on{background:var(--accent);color:#0d0d0f;border-color:var(--accent);font-weight:600}
+  .bar.pages button.on{background:var(--ink);color:#0d0d0f;border-color:var(--ink)}
+  .note{border-left:2px solid var(--accent);padding:10px 0 10px 14px;margin:0 0 22px;
+    color:var(--dim);max-width:80ch;line-height:1.65}
+  .note b{color:var(--ink);font-weight:600}
+
+  /* ── холст макета ── */
+  .canvas{border:1px solid var(--line);background:var(--panel);padding:0;overflow:hidden;
+    color:var(--ink);position:relative;transition:background .24s ease,color .24s ease}
+  .canvas .b,.canvas .t,.canvas .img,.canvas .sep,.canvas .cta,.canvas .tag,
+  .canvas .lbl,.canvas .nav,.canvas .foot,.canvas .tt .ev,.canvas .tt .em,.canvas .tt .hd{
+    transition:background .24s ease,border-color .24s ease,color .24s ease}
+  /* «склейка» — затемнение на время перехода */
+  .canvas::after{content:"";position:absolute;inset:0;z-index:20;pointer-events:none;
+    background:#000;opacity:0;transition:opacity .16s ease}
+  .canvas.splice::after{opacity:1;transition:opacity .16s ease}
+  @media(prefers-reduced-motion:reduce){
+    .canvas,.canvas *,.canvas::after{transition:none!important}}
+  .vp{padding:18px;font-weight:var(--w-body);line-height:var(--lh)}
+  .screen{display:none}
+  .screen.on{display:block}
+
+  /* ── низкодетальные примитивы ── */
+  .b{background:var(--box);border:1px solid var(--line);display:flex;align-items:center;
+     justify-content:center;color:var(--dimmer);font-size:10px;letter-spacing:.12em;
+     text-transform:uppercase;text-align:center;padding:8px}
+  .b.img::after{content:"";position:absolute}
+  .img{position:relative;background:
+     repeating-linear-gradient(45deg,var(--hatch1) 0 8px,var(--hatch2) 8px 16px);
+     border:1px solid var(--line)}
+  .img span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+     color:var(--dimmer);font-size:10px;letter-spacing:.12em}
+  .t{background:var(--line);height:10px;border-radius:1px}
+  .t.sm{height:7px}.t.lg{height:18px}.t.xl{height:30px}.t.xxl{height:48px}
+  .t.w90{width:90%}.t.w80{width:80%}.t.w70{width:70%}.t.w60{width:60%}
+  .t.w50{width:50%}.t.w40{width:40%}.t.w30{width:30%}.t.w25{width:25%}.t.w15{width:15%}
+  .stack>*+*{margin-top:8px}
+  .lbl{color:var(--dimmer);font-size:10px;text-transform:uppercase;
+     letter-spacing:calc(.14em + var(--track))}
+  .cta{border:1px solid var(--accent);color:var(--accent);padding:9px 16px;display:inline-block;
+     font-size:10px;text-transform:uppercase;letter-spacing:calc(.14em + var(--track))}
+  .cta.solid{background:var(--accent);color:var(--on-accent);font-weight:var(--w-disp)}
+  .row{display:flex;gap:12px}
+  .grid{display:grid;gap:12px}
+  .sep{height:1px;background:var(--line);margin:18px 0}
+  .tag{border:1px solid var(--line2);color:var(--dim);font-size:9px;padding:3px 8px;
+     text-transform:uppercase;display:inline-block;letter-spacing:calc(.1em + var(--track))}
+
+  /* ── шапка макета ── */
+  .nav{display:flex;align-items:center;gap:22px;padding:14px 0;border-bottom:1px solid var(--line)}
+  .nav .logo{font-weight:var(--w-disp);font-size:11px;letter-spacing:calc(.06em + var(--track))}
+  .nav .items{display:flex;gap:16px;color:var(--dim);font-size:11px;
+     letter-spacing:calc(.04em + var(--track))}
+  .nav .right{margin-left:auto;display:flex;gap:12px;align-items:center}
+  .navc{flex-direction:column;gap:12px;text-align:center}
+  .navc .items{justify-content:center}
+
+  /* ── аннотации ── */
+  .ann{position:relative;outline:1px dashed transparent}
+  .canvas.showAnn .ann{outline-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+  .ann>.pin{display:none}
+  .canvas.showAnn .ann>.pin{display:block;position:absolute;top:-1px;right:-1px;z-index:5;
+    background:var(--accent);color:var(--on-accent);font-size:9px;font-weight:700;padding:1px 5px;
+    letter-spacing:.06em}
+  .legend{display:none;margin-top:14px;border:1px solid var(--line);padding:14px 16px}
+  .canvas.showAnn + .legend{display:block}
+  .legend li{color:var(--dim);margin:5px 0;line-height:1.55}
+  .legend b{color:var(--accent);font-weight:700}
+  .legend ol{margin:6px 0 0;padding-left:20px}
+  .legend h4{margin:0;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+
+  /* ── расписание ── */
+  .tt{display:grid;grid-template-columns:56px repeat(4,1fr);gap:4px}
+  .tt .hd{color:var(--dimmer);font-size:10px;letter-spacing:.1em;padding:6px 4px;
+     border-bottom:1px solid var(--line2);text-transform:uppercase}
+  .tt .tm{color:var(--dimmer);font-size:10px;padding:6px 4px;text-align:right}
+  .tt .ev{background:var(--box);border:1px solid var(--line);border-left:2px solid var(--dim);
+     padding:7px;min-height:52px}
+  .tt .ev.a{border-left-color:var(--accent)}
+  .tt .ev.b{border-left-color:#6f7cff}
+  .tt .ev.c{border-left-color:#ff7a5c}
+  .tt .em{background:transparent;border:1px dashed var(--line);min-height:52px}
+  .foot{border-top:1px solid var(--line);margin-top:24px;padding-top:16px;
+     display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  @media(max-width:860px){.tt{grid-template-columns:44px repeat(2,1fr)}
+    .tt .d3,.tt .d4{display:none}.foot{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Низкодетальные вайрфреймы — по-ту-сторонний 3.0</h1>
+<p class="sub">Три структурных направления. Никакой типографики, никакого цвета, никакого стиля —
+это карта решений, а не дизайн. Выбираем структуру, потом накладываем визуальный язык.
+Переключайте направление и страницу. Кнопка «аннотации» подписывает решения.<br>
+<b style="color:var(--ink)">Кнопка «мир» переключает между «реальностью» и «по ту сторону».</b>
+Обратите внимание: макет, сетка, отступы и структура не меняются — меняются только цвет,
+текстура, обработка изображений и типографический регистр (вес и трекинг). Это и есть правило
+дисциплины из <code>09-two-worlds.md</code>.<br>
+<span style="color:var(--dimmer)">Даты, названия и метаданные — заглушки. Фестиваль в сентябре 2026;
+точные числа уточняются.</span></p>
+
+<div class="bar" id="dirs">
+  <button class="on" data-dir="A">A — Каталог</button>
+  <button data-dir="B">B — Полосы</button>
+  <button data-dir="C">C — Лента</button>
+  <button id="annBtn" style="margin-left:auto">Аннотации: выкл</button>
+</div>
+<div class="bar pages" id="pages">
+  <button class="on" data-pg="home">Главная</button>
+  <button data-pg="prog">Программа</button>
+  <button data-pg="tt">Расписание</button>
+  <button data-pg="film">Фильм</button>
+  <button id="worldBtn" style="margin-left:auto;border-color:var(--accent);color:var(--accent)">
+    Мир: реальность → по ту сторону</button>
+</div>
+
+<div id="note" class="note"></div>
+
+<div class="canvas" id="canvas">
+
+<!-- ══════════════════════════ A — КАТАЛОГ ══════════════════════════ -->
+<div class="vp screen on" data-s="A-home">
+  <div class="nav">
+    <div class="logo">ПО-ТУ-СТОРОННИЙ</div>
+    <div class="items">Фестиваль | Лаборатория | Архив | Материалы | О нас</div>
+    <div class="right"><span class="cta solid">БИЛЕТЫ</span><span class="lbl">RU / EN</span></div>
+  </div>
+
+  <div class="row ann" style="margin-top:22px;gap:28px"><span class="pin">1</span>
+    <div style="flex:0 0 210px" class="stack">
+      <div class="lbl">Сезон 2026</div>
+      <div class="t xl w90"></div><div class="t lg w60"></div>
+      <div class="t sm w80"></div><div class="t sm w70"></div>
+      <div style="margin-top:8px"><span class="cta">Программа</span></div>
+    </div>
+    <div style="flex:1" class="stack">
+      <div class="t xxl"></div><div class="t xxl w80"></div>
+      <div class="t w90" style="margin-top:14px"></div>
+      <div class="t w80"></div><div class="t w60"></div>
+    </div>
+  </div>
+
+  <div class="sep"></div>
+  <div class="lbl" style="margin-bottom:10px">Ближайшие события</div>
+  <div class="stack ann"><span class="pin">2</span>
+    <div class="row" style="align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px">
+      <div style="flex:0 0 90px" class="lbl">17 СЕН 19:00</div>
+      <div style="flex:1" class="stack"><div class="t lg w60"></div><div class="t sm w40"></div></div>
+      <div style="flex:0 0 100px" class="lbl">ГОРКА</div>
+      <div><span class="cta">Билет</span></div>
+    </div>
+    <div class="row" style="align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px">
+      <div style="flex:0 0 90px" class="lbl">18 СЕН 17:00</div>
+      <div style="flex:1" class="stack"><div class="t lg w70"></div><div class="t sm w30"></div></div>
+      <div style="flex:0 0 100px" class="lbl">ДОМ РАДИО</div>
+      <div><span class="cta">Билет</span></div>
+    </div>
+    <div class="row" style="align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px">
+      <div style="flex:0 0 90px" class="lbl">18 СЕН 21:00</div>
+      <div style="flex:1" class="stack"><div class="t lg w50"></div><div class="t sm w50"></div></div>
+      <div style="flex:0 0 100px" class="lbl">ГОРКА</div>
+      <div><span class="cta">Билет</span></div>
+    </div>
+  </div>
+
+  <div class="sep"></div>
+  <div class="grid ann" style="grid-template-columns:repeat(3,1fr)"><span class="pin">3</span>
+    <div class="stack"><div class="lbl">Лаборатория</div><div class="t lg w80"></div>
+      <div class="t sm"></div><div class="t sm w70"></div></div>
+    <div class="stack"><div class="lbl">Опен колл 2026</div><div class="t lg w70"></div>
+      <div class="t sm"></div><div class="t sm w60"></div></div>
+    <div class="stack"><div class="lbl">Архив 2024 / 2025</div><div class="t lg w90"></div>
+      <div class="t sm"></div><div class="t sm w50"></div></div>
+  </div>
+
+  <div class="sep"></div>
+  <div class="lbl" style="margin-bottom:10px">Материалы</div>
+  <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="stack"><span class="tag">Интервью</span><div class="t w90"></div><div class="t sm w60"></div></div>
+    <div class="stack"><span class="tag">Шоукейс</span><div class="t w80"></div><div class="t sm w70"></div></div>
+    <div class="stack"><span class="tag">Текст</span><div class="t w90"></div><div class="t sm w40"></div></div>
+  </div>
+  <div class="foot"><div class="t sm w70"></div><div class="t sm w60"></div><div class="t sm w80"></div><div class="t sm w50"></div></div>
+</div>
+
+<div class="vp screen" data-s="A-prog">
+  <div class="nav"><div class="logo">ПО-ТУ-СТОРОННИЙ</div>
+    <div class="items">Фестиваль | Лаборатория | Архив | Материалы | О нас</div>
+    <div class="right"><span class="cta solid">БИЛЕТЫ</span><span class="lbl">RU / EN</span></div></div>
+  <div class="row" style="margin-top:22px;gap:28px">
+    <div style="flex:0 0 190px" class="stack ann"><span class="pin">4</span>
+      <div class="lbl">Дата</div>
+      <div class="stack"><div class="t sm w80"></div><div class="t sm w70"></div><div class="t sm w60"></div></div>
+      <div class="lbl" style="margin-top:14px">Площадка</div>
+      <div class="stack"><div class="t sm w70"></div><div class="t sm w80"></div></div>
+      <div class="lbl" style="margin-top:14px">Полоса</div>
+      <div class="stack"><div class="t sm w60"></div><div class="t sm w70"></div><div class="t sm w50"></div></div>
+      <div class="lbl" style="margin-top:14px">Тип</div>
+      <div class="stack"><div class="t sm w80"></div><div class="t sm w50"></div></div>
+    </div>
+    <div style="flex:1">
+      <div class="row" style="align-items:center;margin-bottom:14px">
+        <div class="lbl">24 события</div>
+        <div style="margin-left:auto" class="lbl">СПИСОК ▍ СЕТКА</div>
+      </div>
+      <div class="stack">
+        <div class="row ann" style="border:1px solid var(--line);padding:12px;gap:14px"><span class="pin">5</span>
+          <div class="img" style="flex:0 0 132px;height:76px"><span>КАДР</span></div>
+          <div style="flex:1" class="stack"><div class="t lg w70"></div><div class="t sm w40"></div>
+            <div class="lbl">17 СЕН | 19:00 | ГОРКА | 82 МИН | 16ММ</div></div>
+          <div style="align-self:center"><span class="cta">Билет</span></div>
+        </div>
+        <div class="row" style="border:1px solid var(--line);padding:12px;gap:14px">
+          <div class="img" style="flex:0 0 132px;height:76px"><span>КАДР</span></div>
+          <div style="flex:1" class="stack"><div class="t lg w60"></div><div class="t sm w50"></div>
+            <div class="lbl">18 СЕН | 17:00 | ДОМ РАДИО | 54 МИН</div></div>
+          <div style="align-self:center"><span class="cta">Билет</span></div>
+        </div>
+        <div class="row" style="border:1px solid var(--line);padding:12px;gap:14px">
+          <div class="img" style="flex:0 0 132px;height:76px"><span>КАДР</span></div>
+          <div style="flex:1" class="stack"><div class="t lg w80"></div><div class="t sm w30"></div>
+            <div class="lbl">18 СЕН | 21:00 | ГОРКА | 110 МИН</div></div>
+          <div style="align-self:center"><span class="cta">Билет</span></div>
+        </div>
+        <div class="row" style="border:1px solid var(--line);padding:12px;gap:14px">
+          <div class="img" style="flex:0 0 132px;height:76px"><span>КАДР</span></div>
+          <div style="flex:1" class="stack"><div class="t lg w50"></div><div class="t sm w60"></div>
+            <div class="lbl">19 СЕН | 14:00 | ГОРКА | ЛАБОРАТОРИЯ</div></div>
+          <div style="align-self:center"><span class="cta">Билет</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="vp screen" data-s="A-tt">
+  <div class="nav"><div class="logo">ПО-ТУ-СТОРОННИЙ</div>
+    <div class="items">Фестиваль | Лаборатория | Архив | Материалы | О нас</div>
+    <div class="right"><span class="cta solid">БИЛЕТЫ</span><span class="lbl">RU / EN</span></div></div>
+  <div class="row" style="margin:22px 0 14px;align-items:baseline">
+    <div class="t lg w25"></div>
+    <div style="margin-left:auto" class="lbl">ВСЕ ПЛОЩАДКИ ▾ &nbsp; ВСЕ ПОЛОСЫ ▾ &nbsp; .ICS</div>
+  </div>
+  <div class="tt ann"><span class="pin">6</span>
+    <div></div>
+    <div class="hd">ЧТ 17</div><div class="hd">ПТ 18</div><div class="hd d3">СБ 19</div><div class="hd d4">ВС 20</div>
+    <div class="tm">14:00</div>
+    <div class="em"></div><div class="ev b"><div class="t sm w80"></div><div class="lbl" style="margin-top:6px">ДОМ РАДИО</div></div>
+    <div class="ev a d3"><div class="t sm w70"></div><div class="lbl" style="margin-top:6px">ГОРКА</div></div><div class="em d4"></div>
+    <div class="tm">17:00</div>
+    <div class="ev a"><div class="t sm w70"></div><div class="lbl" style="margin-top:6px">ГОРКА</div></div>
+    <div class="ev b"><div class="t sm w60"></div><div class="lbl" style="margin-top:6px">ДОМ РАДИО</div></div>
+    <div class="em d3"></div><div class="ev c d4"><div class="t sm w80"></div><div class="lbl" style="margin-top:6px">ЭХО | МСК</div></div>
+    <div class="tm">19:00</div>
+    <div class="ev a"><div class="t sm w80"></div><div class="lbl" style="margin-top:6px">ГОРКА</div></div>
+    <div class="em"></div>
+    <div class="ev a d3"><div class="t sm w60"></div><div class="lbl" style="margin-top:6px">ГОРКА</div></div><div class="em d4"></div>
+    <div class="tm">21:00</div>
+    <div class="em"></div>
+    <div class="ev a"><div class="t sm w70"></div><div class="lbl" style="margin-top:6px">ГОРКА</div></div>
+    <div class="ev c d3"><div class="t sm w80"></div><div class="lbl" style="margin-top:6px">ЭХО | КЛГ</div></div><div class="em d4"></div>
+  </div>
+  <div class="row" style="margin-top:16px;gap:18px">
+    <span class="lbl" style="border-left:2px solid var(--accent);padding-left:8px">ГОРКА</span>
+    <span class="lbl" style="border-left:2px solid #6f7cff;padding-left:8px">ДОМ РАДИО</span>
+    <span class="lbl" style="border-left:2px solid #ff7a5c;padding-left:8px">ЭХО В ДРУГИХ ГОРОДАХ</span>
+  </div>
+</div>
+
+<div class="vp screen" data-s="A-film">
+  <div class="nav"><div class="logo">ПО-ТУ-СТОРОННИЙ</div>
+    <div class="items">Фестиваль | Лаборатория | Архив | Материалы | О нас</div>
+    <div class="right"><span class="cta solid">БИЛЕТЫ</span><span class="lbl">RU / EN</span></div></div>
+  <div class="lbl" style="margin:18px 0">ФЕСТИВАЛЬ 2026 › ФИЛЬМЫ › …</div>
+  <div class="row" style="gap:28px">
+    <div style="flex:1.35" class="stack">
+      <div class="img" style="height:300px"><span>КАДР 16:9</span></div>
+    </div>
+    <div style="flex:1" class="stack ann"><span class="pin">7</span>
+      <div class="t xl w90"></div>
+      <div class="t w60" style="opacity:.55"></div>
+      <div class="lbl" style="margin-top:10px">РЕЖИССЁР | СТРАНА | 2025 | 82 МИН | 16ММ</div>
+      <div class="sep" style="margin:12px 0"></div>
+      <div class="t sm"></div><div class="t sm w90"></div><div class="t sm w80"></div>
+      <div class="t sm w90"></div><div class="t sm w50"></div>
+      <div style="margin-top:14px"><span class="cta solid">Билеты на показ</span></div>
+    </div>
+  </div>
+  <div class="sep"></div>
+  <div class="lbl ann" style="margin-bottom:10px"><span class="pin">8</span>ПОКАЗЫ ЭТОГО ФИЛЬМА НА ФЕСТИВАЛЕ</div>
+  <div class="stack">
+    <div class="row" style="align-items:center;border-bottom:1px solid var(--line);padding-bottom:9px">
+      <div class="lbl" style="flex:0 0 130px">2026 | 17 СЕН 19:00</div><div class="t sm w40" style="flex:1"></div><span class="cta">Билет</span></div>
+    <div class="row" style="align-items:center;border-bottom:1px solid var(--line);padding-bottom:9px">
+      <div class="lbl" style="flex:0 0 130px">2025 | ЭХО | ВЫБОРГ</div><div class="t sm w30" style="flex:1"></div><span class="lbl">АРХИВ</span></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ B — ПОЛОСЫ ══════════════════════════ -->
+<div class="vp screen" data-s="B-home">
+  <div class="nav navc">
+    <div class="logo" style="font-size:13px">ПО-ТУ-СТОРОННИЙ</div>
+    <div class="items">Фестиваль | Лаборатория | Архив | Материалы | О нас | <b style="color:var(--accent)">БИЛЕТЫ</b> | RU/EN</div>
+  </div>
+  <div class="stack ann" style="text-align:center;padding:44px 0 34px"><span class="pin">9</span>
+    <div class="t xxl w60" style="margin:0 auto"></div>
+    <div class="t xxl w40" style="margin:8px auto 0"></div>
+    <div class="lbl" style="margin-top:18px">СЕЗОН «ПЕРЕХОД» | 17–20 СЕНТЯБРЯ 2026 | САНКТ-ПЕТЕРБУРГ</div>
+  </div>
+  <div class="grid ann" style="grid-template-columns:1fr 1fr"><span class="pin">10</span>
+    <div class="stack" style="border:1px solid var(--line);padding:0 0 16px">
+      <div class="img" style="height:190px"><span>ОБЛОЖКА ПОЛОСЫ</span></div>
+      <div style="padding:0 16px" class="stack"><div class="t xl w60"></div>
+        <div class="t sm"></div><div class="t sm w90"></div><div class="t sm w60"></div>
+        <div style="margin-top:6px"><span class="cta">Смотреть</span></div></div>
+    </div>
+    <div class="stack" style="border:1px solid var(--line);padding:0 0 16px">
+      <div class="img" style="height:190px"><span>ОБЛОЖКА ПОЛОСЫ</span></div>
+      <div style="padding:0 16px" class="stack"><div class="t xl w70"></div>
+        <div class="t sm"></div><div class="t sm w80"></div><div class="t sm w70"></div>
+        <div style="margin-top:6px"><span class="cta">Смотреть</span></div></div>
+    </div>
+    <div class="stack" style="border:1px solid var(--line);padding:0 0 16px">
+      <div class="img" style="height:190px"><span>ОБЛОЖКА ПОЛОСЫ</span></div>
+      <div style="padding:0 16px" class="stack"><div class="t xl w50"></div>
+        <div class="t sm"></div><div class="t sm w90"></div><div class="t sm w50"></div>
+        <div style="margin-top:6px"><span class="cta">Смотреть</span></div></div>
+    </div>
+    <div class="stack" style="border:1px solid var(--line);padding:0 0 16px">
+      <div class="img" style="height:190px"><span>ОБЛОЖКА ПОЛОСЫ</span></div>
+      <div style="padding:0 16px" class="stack"><div class="t xl w80"></div>
+        <div class="t sm"></div><div class="t sm w70"></div><div class="t sm w60"></div>
+        <div style="margin-top:6px"><span class="cta">Смотреть</span></div></div>
+    </div>
+  </div>
+  <div class="ann" style="border:1px solid var(--accent);padding:22px;margin-top:16px;text-align:center"><span class="pin">11</span>
+    <div class="lbl" style="color:var(--accent)">ОПЕН КОЛЛ 2026 — ПРИЁМ РАБОТ ОТКРЫТ</div>
+    <div class="t lg w40" style="margin:12px auto"></div>
+    <span class="cta solid">Заполнить заявку</span>
+  </div>
+  <div class="foot"><div class="t sm w70"></div><div class="t sm w60"></div><div class="t sm w80"></div><div class="t sm w50"></div></div>
+</div>
+
+<div class="vp screen" data-s="B-prog">
+  <div class="nav navc"><div class="logo" style="font-size:13px">ПО-ТУ-СТОРОННИЙ</div>
+    <div class="items">Фестиваль | Лаборатория | Архив | Материалы | О нас | <b style="color:var(--accent)">БИЛЕТЫ</b> | RU/EN</div></div>
+  <div style="text-align:center;padding:30px 0 20px"><div class="t xl w30" style="margin:0 auto"></div></div>
+  <div class="bar ann" style="justify-content:center;gap:10px"><span class="pin">12</span>
+    <span class="tag">ВСЕ ДНИ</span><span class="tag">14</span><span class="tag">15</span><span class="tag">16</span>
+    <span class="tag">17</span><span class="tag">ГОРКА</span><span class="tag">ДОМ РАДИО</span><span class="tag">ЛАБОРАТОРИЯ</span>
+  </div>
+  <div class="grid" style="grid-template-columns:repeat(3,1fr);margin-top:18px">
+    <div class="stack"><div class="img" style="height:150px"><span>КАДР</span></div>
+      <div class="t lg w80"></div><div class="lbl">17 СЕН | 19:00 | ГОРКА</div><span class="cta">Билет</span></div>
+    <div class="stack"><div class="img" style="height:150px"><span>КАДР</span></div>
+      <div class="t lg w60"></div><div class="lbl">18 СЕН | 17:00 | ДОМ РАДИО</div><span class="cta">Билет</span></div>
+    <div class="stack"><div class="img" style="height:150px"><span>КАДР</span></div>
+      <div class="t lg w70"></div><div class="lbl">18 СЕН | 21:00 | ГОРКА</div><span class="cta">Билет</span></div>
+    <div class="stack"><div class="img" style="height:150px"><span>КАДР</span></div>
+      <div class="t lg w50"></div><div class="lbl">19 СЕН | 14:00 | ГОРКА</div><span class="cta">Билет</span></div>
+    <div class="stack"><div class="img" style="height:150px"><span>КАДР</span></div>
+      <div class="t lg w90"></div><div class="lbl">19 СЕН | 19:00 | ГОРКА</div><span class="cta">Билет</span></div>
+    <div class="stack"><div class="img" style="height:150px"><span>КАДР</span></div>
+      <div class="t lg w70"></div><div class="lbl">20 СЕН | 18:00 | ЭХО</div><span class="cta">Билет</span></div>
+  </div>
+</div>
+
+<div class="vp screen" data-s="B-tt">
+  <div class="nav navc"><div class="logo" style="font-size:13px">ПО-ТУ-СТОРОННИЙ</div>
+    <div class="items">Фестиваль | Лаборатория | Архив | Материалы | О нас | <b style="color:var(--accent)">БИЛЕТЫ</b> | RU/EN</div></div>
+  <div style="text-align:center;padding:30px 0 8px"><div class="t xl w25" style="margin:0 auto"></div></div>
+  <div class="bar ann" style="justify-content:center"><span class="pin">13</span>
+    <button class="on">ЧТ 17</button><button>ПТ 18</button><button>СБ 19</button><button>ВС 20</button>
+  </div>
+  <div class="stack" style="margin-top:18px;max-width:760px;margin-left:auto;margin-right:auto">
+    <div class="row" style="gap:16px;border-bottom:1px solid var(--line);padding-bottom:14px">
+      <div class="lbl" style="flex:0 0 60px">17:00</div>
+      <div class="img" style="flex:0 0 110px;height:64px"><span>КАДР</span></div>
+      <div style="flex:1" class="stack"><div class="t lg w70"></div><div class="lbl">ГОРКА | 82 МИН | 16ММ</div></div>
+      <div style="align-self:center"><span class="cta">Билет</span></div>
+    </div>
+    <div class="row" style="gap:16px;border-bottom:1px solid var(--line);padding-bottom:14px">
+      <div class="lbl" style="flex:0 0 60px">19:00</div>
+      <div class="img" style="flex:0 0 110px;height:64px"><span>КАДР</span></div>
+      <div style="flex:1" class="stack"><div class="t lg w60"></div><div class="lbl">ГОРКА | 54 МИН</div></div>
+      <div style="align-self:center"><span class="cta">Билет</span></div>
+    </div>
+    <div class="row" style="gap:16px;border-bottom:1px solid var(--line);padding-bottom:14px">
+      <div class="lbl" style="flex:0 0 60px">21:00</div>
+      <div class="img" style="flex:0 0 110px;height:64px"><span>КАДР</span></div>
+      <div style="flex:1" class="stack"><div class="t lg w80"></div><div class="lbl">ДОМ РАДИО | 110 МИН</div></div>
+      <div style="align-self:center"><span class="cta">Билет</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="vp screen" data-s="B-film">
+  <div class="nav navc"><div class="logo" style="font-size:13px">ПО-ТУ-СТОРОННИЙ</div>
+    <div class="items">Фестиваль | Лаборатория | Архив | Материалы | О нас | <b style="color:var(--accent)">БИЛЕТЫ</b> | RU/EN</div></div>
+  <div class="img ann" style="height:340px;margin-top:18px"><span class="pin">14</span><span>КАДР НА ВСЮ ШИРИНУ</span></div>
+  <div style="max-width:680px;margin:26px auto 0" class="stack" >
+    <div class="t xxl w80"></div>
+    <div class="t lg w50" style="opacity:.55"></div>
+    <div class="lbl" style="margin-top:8px">РЕЖИССЁР | СТРАНА | 2025 | 82 МИН | 16ММ</div>
+    <div class="sep"></div>
+    <div class="t sm"></div><div class="t sm w90"></div><div class="t sm w95"></div>
+    <div class="t sm w80"></div><div class="t sm w60"></div>
+    <div style="margin-top:16px"><span class="cta solid">Билеты на показ</span></div>
+    <div class="sep"></div>
+    <div class="lbl">ПОКАЗЫ | 17 СЕН 19:00 ГОРКА | АРХИВ 2025 ВЫБОРГ</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ C — ЛЕНТА ══════════════════════════ -->
+<div class="vp screen" data-s="C-home">
+  <div class="nav"><div class="logo">ПО-ТУ-СТОРОННИЙ</div>
+    <div class="items">Фестиваль | Лаборатория | Архив | Материалы | О нас</div>
+    <div class="right"><span class="cta solid">БИЛЕТЫ</span><span class="lbl">RU / EN</span></div></div>
+  <div class="row ann" style="margin-top:22px;align-items:flex-end;gap:24px"><span class="pin">15</span>
+    <div style="flex:1"><div class="t xxl w70"></div><div class="t xxl w50" style="margin-top:8px"></div></div>
+    <div style="flex:0 0 240px" class="stack">
+      <div class="lbl">ДО ФЕСТИВАЛЯ</div><div class="t xl w60"></div>
+      <div class="lbl">17–20 СЕНТЯБРЯ | СПБ</div></div>
+  </div>
+  <div class="sep"></div>
+  <div class="row ann" style="gap:0"><span class="pin">16</span>
+    <div style="flex:0 0 128px" class="stack" >
+      <div class="lbl">МАЙ–ИЮЛЬ</div><div class="lbl">ИЮЛЬ–СЕН</div>
+      <div class="lbl" style="color:var(--accent)">17–20 СЕН</div><div class="lbl">ОКТЯБРЬ</div>
+      <div class="lbl">2025 / 2024</div>
+    </div>
+    <div style="flex:0 0 1px;background:var(--line2);margin-right:22px"></div>
+    <div style="flex:1" class="stack">
+      <div style="border:1px solid var(--line);padding:14px" class="stack">
+        <span class="tag">ОПЕН КОЛЛ</span><div class="t lg w60"></div><div class="t sm w80"></div>
+        <span class="cta">Подать работу</span></div>
+      <div style="border:1px solid var(--line);padding:14px" class="stack">
+        <span class="tag">ЛАБОРАТОРИЯ</span><div class="t lg w70"></div><div class="t sm w90"></div>
+        <div class="t sm w50"></div></div>
+      <div style="border:1px solid var(--accent);padding:14px" class="stack">
+        <span class="tag" style="border-color:var(--accent);color:var(--accent)">ФЕСТИВАЛЬ</span>
+        <div class="t lg w80"></div><div class="t sm w70"></div>
+        <div class="row" style="margin-top:6px"><span class="cta solid">Расписание</span><span class="cta">Билеты</span></div></div>
+      <div style="border:1px solid var(--line);padding:14px" class="stack">
+        <span class="tag">ЭХО В ДРУГИХ ГОРОДАХ</span><div class="t lg w50"></div><div class="t sm w60"></div></div>
+      <div style="border:1px solid var(--line);padding:14px;opacity:.6" class="stack">
+        <span class="tag">АРХИВ</span><div class="t lg w70"></div><div class="t sm w40"></div></div>
+    </div>
+  </div>
+  <div class="foot"><div class="t sm w70"></div><div class="t sm w60"></div><div class="t sm w80"></div><div class="t sm w50"></div></div>
+</div>
+
+<div class="vp screen" data-s="C-prog">
+  <div class="nav"><div class="logo">ПО-ТУ-СТОРОННИЙ</div>
+    <div class="items">Фестиваль | Лаборатория | Архив | Материалы | О нас</div>
+    <div class="right"><span class="cta solid">БИЛЕТЫ</span><span class="lbl">RU / EN</span></div></div>
+  <div class="row" style="margin:22px 0 14px;align-items:baseline">
+    <div class="t lg w25"></div><div style="margin-left:auto" class="lbl">ПО ДНЯМ ▍ ПО ФИЛЬМАМ ▍ ПО ПОЛОСАМ</div>
+  </div>
+  <div class="ann"><span class="pin">17</span>
+    <div class="lbl" style="border-bottom:1px solid var(--line2);padding-bottom:6px;margin-bottom:12px">ЧЕТВЕРГ 17 СЕНТЯБРЯ</div>
+    <div class="stack">
+      <div class="row" style="gap:16px;align-items:center"><div class="lbl" style="flex:0 0 54px">17:00</div>
+        <div class="img" style="flex:0 0 96px;height:56px"><span>КАДР</span></div>
+        <div style="flex:1" class="stack"><div class="t w70"></div><div class="lbl">ГОРКА | 82 МИН</div></div><span class="cta">Билет</span></div>
+      <div class="row" style="gap:16px;align-items:center"><div class="lbl" style="flex:0 0 54px">19:00</div>
+        <div class="img" style="flex:0 0 96px;height:56px"><span>КАДР</span></div>
+        <div style="flex:1" class="stack"><div class="t w60"></div><div class="lbl">ГОРКА | 54 МИН</div></div><span class="cta">Билет</span></div>
+    </div>
+    <div class="lbl" style="border-bottom:1px solid var(--line2);padding-bottom:6px;margin:20px 0 12px">ПЯТНИЦА 18 СЕНТЯБРЯ</div>
+    <div class="stack">
+      <div class="row" style="gap:16px;align-items:center"><div class="lbl" style="flex:0 0 54px">17:00</div>
+        <div class="img" style="flex:0 0 96px;height:56px"><span>КАДР</span></div>
+        <div style="flex:1" class="stack"><div class="t w80"></div><div class="lbl">ДОМ РАДИО | 110 МИН</div></div><span class="cta">Билет</span></div>
+      <div class="row" style="gap:16px;align-items:center"><div class="lbl" style="flex:0 0 54px">21:00</div>
+        <div class="img" style="flex:0 0 96px;height:56px"><span>КАДР</span></div>
+        <div style="flex:1" class="stack"><div class="t w50"></div><div class="lbl">ГОРКА | ЛАБОРАТОРИЯ</div></div><span class="cta">Билет</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="vp screen" data-s="C-tt">
+  <div class="nav"><div class="logo">ПО-ТУ-СТОРОННИЙ</div>
+    <div class="items">Фестиваль | Лаборатория | Архив | Материалы | О нас</div>
+    <div class="right"><span class="cta solid">БИЛЕТЫ</span><span class="lbl">RU / EN</span></div></div>
+  <div class="row" style="margin:22px 0 12px;align-items:baseline">
+    <div class="t lg w25"></div><div style="margin-left:auto" class="lbl">ПОЛОСЫ ▾ &nbsp; ПЛОЩАДКИ ▾ &nbsp; СКАЧАТЬ .ICS</div>
+  </div>
+  <div class="tt ann"><span class="pin">18</span>
+    <div></div><div class="hd">ЧТ 17</div><div class="hd">ПТ 18</div><div class="hd d3">СБ 19</div><div class="hd d4">ВС 20</div>
+    <div class="tm">12:00</div><div class="em"></div><div class="em"></div>
+    <div class="ev b d3"><div class="t sm w70"></div><div class="lbl" style="margin-top:6px">ЛАБ | РИДИНГ</div></div><div class="em d4"></div>
+    <div class="tm">15:00</div><div class="em"></div>
+    <div class="ev b"><div class="t sm w60"></div><div class="lbl" style="margin-top:6px">ДОМ РАДИО</div></div>
+    <div class="ev a d3"><div class="t sm w80"></div><div class="lbl" style="margin-top:6px">ГОРКА</div></div>
+    <div class="ev c d4"><div class="t sm w60"></div><div class="lbl" style="margin-top:6px">ЭХО | МСК</div></div>
+    <div class="tm">18:00</div>
+    <div class="ev a"><div class="t sm w80"></div><div class="lbl" style="margin-top:6px">ГОРКА | ОТКРЫТИЕ</div></div>
+    <div class="ev a"><div class="t sm w70"></div><div class="lbl" style="margin-top:6px">ГОРКА</div></div>
+    <div class="ev a d3"><div class="t sm w60"></div><div class="lbl" style="margin-top:6px">ГОРКА</div></div>
+    <div class="ev a d4"><div class="t sm w80"></div><div class="lbl" style="margin-top:6px">ЗАКРЫТИЕ</div></div>
+    <div class="tm">21:00</div><div class="em"></div>
+    <div class="ev a"><div class="t sm w70"></div><div class="lbl" style="margin-top:6px">ГОРКА</div></div>
+    <div class="ev c d3"><div class="t sm w60"></div><div class="lbl" style="margin-top:6px">ЭХО | КЛГ</div></div><div class="em d4"></div>
+  </div>
+  <div class="row" style="margin-top:16px;gap:18px">
+    <span class="lbl" style="border-left:2px solid var(--accent);padding-left:8px">ФЕСТИВАЛЬ</span>
+    <span class="lbl" style="border-left:2px solid #6f7cff;padding-left:8px">ЛАБОРАТОРИЯ</span>
+    <span class="lbl" style="border-left:2px solid #ff7a5c;padding-left:8px">ЭХО</span>
+  </div>
+</div>
+
+<div class="vp screen" data-s="C-film">
+  <div class="nav"><div class="logo">ПО-ТУ-СТОРОННИЙ</div>
+    <div class="items">Фестиваль | Лаборатория | Архив | Материалы | О нас</div>
+    <div class="right"><span class="cta solid">БИЛЕТЫ</span><span class="lbl">RU / EN</span></div></div>
+  <div class="row" style="margin-top:22px;gap:0">
+    <div style="flex:0 0 210px" class="stack ann"><span class="pin">19</span>
+      <div class="lbl">РЕЖИССЁР</div><div class="t sm w80"></div>
+      <div class="lbl" style="margin-top:10px">СТРАНА / ГОД</div><div class="t sm w60"></div>
+      <div class="lbl" style="margin-top:10px">ХРОНОМЕТРАЖ</div><div class="t sm w40"></div>
+      <div class="lbl" style="margin-top:10px">НОСИТЕЛЬ</div><div class="t sm w50"></div>
+      <div class="lbl" style="margin-top:10px">ПОЛОСА</div><div class="t sm w70"></div>
+      <div style="margin-top:16px"><span class="cta solid">Билеты</span></div>
+    </div>
+    <div style="flex:0 0 1px;background:var(--line);margin-right:26px"></div>
+    <div style="flex:1" class="stack">
+      <div class="t xxl w80"></div><div class="t lg w50" style="opacity:.55"></div>
+      <div class="img" style="height:250px;margin-top:12px"><span>КАДР</span></div>
+      <div class="t sm" style="margin-top:12px"></div><div class="t sm w90"></div>
+      <div class="t sm w80"></div><div class="t sm w60"></div>
+      <div class="sep"></div>
+      <div class="lbl">ПОКАЗЫ</div>
+      <div class="row" style="align-items:center;border-bottom:1px solid var(--line);padding-bottom:8px">
+        <div class="lbl" style="flex:0 0 140px">2026 | 17 СЕН 19:00</div><div class="t sm w30" style="flex:1"></div><span class="cta">Билет</span></div>
+      <div class="row" style="align-items:center;padding-bottom:8px">
+        <div class="lbl" style="flex:0 0 140px">2025 | ЭХО | ВЫБОРГ</div><div class="t sm w25" style="flex:1"></div><span class="lbl">АРХИВ</span></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /canvas -->
+
+<div class="legend" id="legend"></div>
+
+</div>
+
+<script>
+const NOTES = {
+  A: "<b>A — Каталог.</b> Плотная, типографическая, списочная структура. Главная — не витрина, а оглавление: сезон, ближайшие события строками, три полосы, материалы. Программа — таблица с боковыми фильтрами. Регистр: архив, издание, картотека. <b>Сильно:</b> много информации без прокрутки, естественно масштабируется до 40+ событий, дёшево делать и поддерживать, идеально ложится на CMS. <b>Слабо:</b> холодновато, изображения работают слабо, требует очень хорошей типографики, чтобы не выглядеть как админка.",
+  B: "<b>B — Полосы.</b> Модель Alchemy / Open City. Главная — четыре крупные плитки: Фестиваль | Лаборатория | Архив | Материалы. Центрированная навигация, изображения ведут. <b>Сильно:</b> сразу объясняет, что фестиваль — это не только показы; красиво и щедро; лучший вариант, если есть сильная фотография. <b>Слабо:</b> низкая информационная плотность, до расписания дальше идти, при 40 событиях сетка карточек становится бесконечной прокруткой.",
+  C: "<b>C — Лента.</b> Организующая метафора — время, что точно рифмуется с темой сезона «переход». Главная — вертикальная ось года: опен колл → лаборатория → фестиваль → эхо → архив. Расписание становится главным объектом сайта, а не подстраницей. <b>Сильно:</b> концептуально самый близкий к фестивалю; честно показывает, что проект живёт круглый год, а не четыре дня; решает проблему «мёртвого» сайта между сезонами. <b>Слабо:</b> самый дорогой в реализации, ось времени требует аккуратной работы на мобильных, и структура должна пересобираться при каждой смене фазы сезона."
+};
+const LEG = {
+  A:["Сезон слева фиксированной колонкой, манифест справа — читается как разворот издания, а не как хиро-баннер",
+     "Ближайшие события строками: дата | название | площадка | билет. Максимум информации, минимум высоты",
+     "Три полосы равным весом — фестиваль не единственное, чем занят проект",
+     "Фильтры в боковой колонке, состояние в URL — ссылку на отфильтрованный вид можно переслать",
+     "Строка события: кадр, название, метаданные одной строкой, билет справа. Плотно и сканируемо",
+     "Сетка расписания: дни — колонки, часы — строки, площадка — цвет левой границы",
+     "Метаданные фильма отдельным блоком: носитель (16мм / цифра) вынесен явно — это важно аудитории экспериментального кино",
+     "Все показы фильма за всю историю фестиваля — то, чего нынешний сайт не умеет вообще"],
+  B:["Крупный центрированный титул сезона — сайт как афиша",
+     "Четыре полосы плитками. Каждая — направление работы проекта, а не пункт меню",
+     "Опен колл отдельным акцентным блоком, показывается по флагу в CMS и исчезает после дедлайна",
+     "Фильтры чипсами по центру — мало опций, зато очевидные",
+     "Расписание по одному дню за раз: переключатель дней вместо сетки. Проще на мобильных, хуже для обзора",
+     "Полноширинный кадр — вариант работает только при сильном фотоматериале"],
+  C:["Обратный отсчёт до фестиваля в шапке — сайт всегда знает, какая сейчас фаза сезона",
+     "Ось года слева, карточки фаз справа. Текущая фаза подсвечена. Между сезонами сайт не пустеет",
+     "Программа сгруппирована по дням прямо в списке — промежуточная форма между списком и сеткой",
+     "Расписание с полосами вместо площадок: фестиваль / лаборатория / эхо. Отражает реальную структуру 3.0",
+     "Метаданные фильма фиксированной колонкой слева — читается как каталожная карточка"]
+};
+let dir='A', pg='home', ann=false, world='real';
+const canvas=document.getElementById('canvas');
+const WORLD_LABEL={real:'Мир: реальность → по ту сторону', other:'Мир: по ту сторону → реальность'};
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function cross(){
+  const next = world==='real' ? 'other' : 'real';
+  if(reduced){ world=next; render(); return; }
+  canvas.classList.add('splice');          // 160мс — уход в чёрное
+  setTimeout(()=>{ world=next; render();   // смена мира за кадром
+    setTimeout(()=>canvas.classList.remove('splice'), 60); // 60мс — удержание
+  }, 160);
+}
+function render(){
+  canvas.dataset.world=world;
+  document.getElementById('worldBtn').textContent=WORLD_LABEL[world];
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on', s.dataset.s===dir+'-'+pg));
+  document.querySelectorAll('#dirs [data-dir]').forEach(b=>b.classList.toggle('on', b.dataset.dir===dir));
+  document.querySelectorAll('#pages [data-pg]').forEach(b=>b.classList.toggle('on', b.dataset.pg===pg));
+  document.getElementById('note').innerHTML=NOTES[dir];
+  canvas.classList.toggle('showAnn', ann);
+  document.getElementById('annBtn').textContent='Аннотации: '+(ann?'вкл':'выкл');
+  document.getElementById('annBtn').classList.toggle('on', ann);
+  document.getElementById('legend').innerHTML =
+    '<h4>Решения направления '+dir+'</h4><ol>'+LEG[dir].map(x=>'<li>'+x+'</li>').join('')+'</ol>';
+}
+document.querySelectorAll('#dirs [data-dir]').forEach(b=>b.onclick=()=>{dir=b.dataset.dir;render()});
+document.querySelectorAll('#pages [data-pg]').forEach(b=>b.onclick=()=>{pg=b.dataset.pg;render()});
+document.getElementById('annBtn').onclick=()=>{ann=!ann;render()};
+document.getElementById('worldBtn').onclick=cross;
+render();
+</script>
+</body>
+</html>

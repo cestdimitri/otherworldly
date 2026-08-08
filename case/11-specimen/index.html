@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Дизайн-система — По-ту-сторонний</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════ ДИЗАЙН-СИСТЕМА ═══════════
+   Пересобрана 3 августа. Прежняя версия описывала систему двух миров, которой
+   больше нет, и с тех пор только патчилась по палитре.
+   Этот файл — источник истины. Если страница расходится с ним, права страница
+   не автоматически: расхождение нужно либо внести сюда, либо убрать оттуда.  */
+
+:root{
+  /* ── цвет ── */
+  --bg:#08080A;
+  --surface:rgba(242,242,244,.045);
+  --surface-2:rgba(242,242,244,.10);      /* наведение */
+  --edge:rgba(242,242,244,.16);
+  --ink:#F2F2F4;
+  --dim:#9A9AA2;
+  --dimmer:#6E6E77;
+  /* ── свечение ── */
+  --glow-1:0 0 18px rgba(242,242,244,.10);
+  --glow-2:0 0 42px rgba(242,242,244,.20);
+  --glow-3:0 0 90px rgba(242,242,244,.30);
+  /* ── изображение ── */
+  --img:grayscale(1) contrast(1.3) brightness(.62);
+  /* ── метрика ── */
+  --h-ctl:40px;                            /* высота управляющего элемента */
+  --h-ctl-sm:34px;
+  --gap-hair:1px;                          /* зазор в списках */
+  --gap-tile:2px;                          /* зазор в плитках */
+  --ease:cubic-bezier(.66,0,.16,1);
+  --r-dock:20px; --r-in:12px;              /* скругления живут только в доке */
+}
+/* Архив — задокументированный вариант, а не переопределение по месту.
+   Закрытый сезон глуше: приглушены сигналы действия, не содержание. */
+[data-mode="archive"]{
+  --surface:rgba(242,242,244,.04);
+  --edge:rgba(242,242,244,.13);
+}
+
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;color:var(--ink);font-family:Inter,-apple-system,sans-serif;line-height:1.5;
+  -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;
+  text-shadow:0 0 1px rgba(242,242,244,.22);
+  background:radial-gradient(140% 78% at 50% -8%,#1A1A22 0%,#101015 26%,#0A0A0D 58%,#08080A 100%),#08080A;
+  background-attachment:fixed}
+.g{font-family:"Golos Text",Inter,sans-serif;text-shadow:0 0 2px rgba(242,242,244,.20)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ═══ ЕДИНСТВЕННЫЙ ИНТЕРАКТИВНЫЙ ПРИМИТИВ ═══
+   Один элемент, две заливки, два размера. Ничего больше в системе не кликается. */
+.b{position:relative;display:inline-flex;align-items:center;justify-content:center;
+  height:var(--h-ctl);padding:0 20px;border:0;cursor:pointer;
+  font-family:Inter,sans-serif;font-weight:600;font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;white-space:nowrap;color:var(--ink);text-decoration:none;
+  background:rgba(242,242,244,.028);box-shadow:inset 0 0 0 1px var(--edge);
+  transition:background .34s ease,box-shadow .34s ease}
+.b>*{position:relative;z-index:1}
+.b::after{content:"";position:absolute;left:50%;top:50%;width:130%;height:230%;z-index:0;
+  transform:translate(-50%,-50%) scale(.55);opacity:0;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(242,242,244,.42),transparent 72%);
+  filter:blur(16px);transition:opacity .42s var(--ease),transform .42s var(--ease)}
+.b:hover{background:var(--surface-2);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.5),var(--glow-2)}
+.b:hover::after{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.b--on,.b[aria-pressed="true"]{background:rgba(242,242,244,.07);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.22)}
+.b--sm{height:var(--h-ctl-sm);padding:0 15px;font-size:10px;letter-spacing:.13em}
+
+/* ═══ КАРКАС ДОКУМЕНТА ═══ */
+.wrap{max-width:1080px;margin:0 auto;padding:44px 40px 130px}
+.pagenav{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;margin-bottom:34px}
+.pagenav a{color:var(--dimmer);text-decoration:none;transition:.24s}
+.pagenav a:hover{color:var(--ink);text-shadow:var(--glow-1)}
+.pagenav a[aria-current]{color:var(--ink)}
+h1{font-family:"Golos Text",sans-serif;font-weight:600;font-size:clamp(30px,5vw,52px);
+  letter-spacing:-.018em;text-transform:uppercase;margin:0;line-height:1.06}
+.sub{font-size:14px;color:var(--dim);margin-top:16px;max-width:64ch;line-height:1.7}
+section{margin-top:94px}
+h2{font-family:"Golos Text",sans-serif;font-weight:500;font-size:12px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--dimmer);margin:0 0 8px}
+.lede{font-size:13.5px;color:var(--dim);max-width:70ch;line-height:1.72;margin:0 0 28px}
+.lede b{color:var(--ink);font-weight:500}
+.lede code{font-size:12px;color:var(--ink)}
+
+/* ═══ ПРАВИЛА ═══ */
+.rules{display:grid;gap:var(--gap-hair)}
+.rule{background:var(--surface);padding:20px 22px;display:grid;
+  grid-template-columns:26px 1fr;gap:18px;align-items:start}
+.rule .n{font-family:"Golos Text",sans-serif;font-weight:600;font-size:15px;color:var(--dimmer)}
+.rule b{display:block;font-family:"Golos Text",sans-serif;font-weight:500;font-size:15px;
+  margin-bottom:7px}
+.rule span{font-size:13px;color:var(--dim);line-height:1.66}
+
+/* ═══ ТОКЕНЫ ═══ */
+.tok{display:grid;gap:var(--gap-hair)}
+.tk{display:grid;grid-template-columns:64px 132px 1fr auto;gap:20px;align-items:center;
+  background:var(--surface);padding:12px 18px;font-size:12px}
+.tk .sw{height:30px}
+.tk code{font-size:11.5px;color:var(--ink);letter-spacing:.02em}
+.tk .v{color:var(--dim);font-size:11.5px}
+.tk .r{color:var(--dimmer);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  white-space:nowrap}
+.tk .r.aaa{color:var(--dim)}
+
+/* ═══ ТИПОГРАФИКА ═══ */
+.type{display:grid;gap:var(--gap-hair)}
+.ty{background:var(--surface);padding:18px 22px;display:grid;
+  grid-template-columns:150px 1fr;gap:24px;align-items:baseline}
+.ty .k{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dimmer)}
+.ty .k i{display:block;font-style:normal;color:var(--dim);letter-spacing:.02em;
+  text-transform:none;font-size:11px;margin-top:5px}
+
+/* ═══ ДЕМОНСТРАЦИИ ═══ */
+.demo{background:var(--surface);padding:26px;display:flex;gap:12px;flex-wrap:wrap;
+  align-items:center}
+.demo.col{flex-direction:column;align-items:stretch;gap:var(--gap-hair);padding:0;
+  background:transparent}
+.row{background:var(--surface);padding:16px 20px;display:grid;
+  grid-template-columns:1fr auto;gap:20px;align-items:center;
+  transition:background .26s,box-shadow .26s}
+.row:hover{background:var(--surface-2);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.18),var(--glow-1)}
+.row .k{font-size:9px;letter-spacing:.17em;text-transform:uppercase;color:var(--dimmer);
+  margin-bottom:5px}
+.row .t{font-family:"Golos Text",sans-serif;font-weight:500;font-size:15px}
+.row .m{font-size:11.5px;color:var(--dim);margin-top:4px}
+.row .m i{color:var(--dimmer);font-style:normal;padding:0 6px}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:var(--gap-tile)}
+.tile{position:relative;aspect-ratio:3/2;overflow:hidden;background:var(--surface)}
+.tile .im{position:absolute;inset:0;filter:var(--img)}
+.tile::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.3;
+  mix-blend-mode:overlay;
+  background-image:radial-gradient(rgba(0,0,0,.9) 1px,transparent 1.2px);background-size:4px 4px}
+.tile figcaption{position:absolute;left:0;right:0;bottom:0;padding:12px 13px;z-index:2;
+  font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.76))}
+.tile.raw::after{display:none}
+.tile.raw .im{filter:none}
+
+.glows{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:var(--gap-tile)}
+.gl{background:var(--surface);padding:26px 22px;text-align:center}
+.gl .dot{width:12px;height:12px;background:var(--ink);margin:0 auto 18px}
+.gl.g1 .dot{box-shadow:var(--glow-1)}
+.gl.g2 .dot{box-shadow:var(--glow-2)}
+.gl.g3 .dot{box-shadow:var(--glow-3)}
+.gl code{display:block;font-size:11px;color:var(--dim)}
+.gl span{display:block;font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--dimmer);margin-top:8px}
+
+/* полосы вместо линеек */
+.bands{background:var(--surface);padding:0;overflow:hidden}
+.bands div{padding:11px 20px;font-size:12px;color:var(--dim)}
+.bands div:nth-child(odd){background:rgba(242,242,244,.022)}
+
+/* ═══ ОТВЕРГНУТО ═══ */
+.rej{display:grid;gap:var(--gap-hair)}
+.rj{background:var(--surface);padding:18px 22px;display:grid;
+  grid-template-columns:1fr 1.35fr;gap:26px;align-items:start;opacity:.72}
+.rj b{font-family:"Golos Text",sans-serif;font-weight:500;font-size:14px;display:block;
+  margin-bottom:6px}
+.rj .why{font-size:12.5px;color:var(--dim);line-height:1.66}
+.rj .d{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dimmer);
+  margin-top:8px}
+
+/* ═══ РАСХОЖДЕНИЯ ═══ */
+.drift{display:grid;gap:var(--gap-hair)}
+.dr{background:var(--surface);padding:16px 20px;font-size:12.5px;color:var(--dim);
+  display:grid;grid-template-columns:180px 1fr;gap:20px;align-items:start}
+.dr b{font-family:"Golos Text",sans-serif;font-weight:500;font-size:13px;color:var(--ink)}
+.dr code{font-size:11.5px;color:var(--dim)}
+.dr .fix{color:var(--dim);margin-top:6px}
+.dr .fix b{display:inline;font-size:12.5px}
+
+@media(max-width:820px){
+  .wrap{padding:32px 20px 100px}
+  .tk{grid-template-columns:52px 1fr;gap:12px}
+  .tk .r{grid-column:1/-1}
+  .ty{grid-template-columns:1fr;gap:12px}
+  .rj,.dr{grid-template-columns:1fr;gap:12px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="pagenav">
+  <a href="../12-homepage/index.html">← Главная</a>
+  <a href="../14-pages/timetable.html">Расписание</a>
+  <a href="../14-pages/programme.html">Программа</a>
+  <a href="../14-pages/film.html">Фильм</a>
+  <a href="../14-pages/article.html">Материал</a>
+  <a href="../14-pages/edition.html">Архив</a>
+  <a href="index.html" aria-current="page">Система</a>
+</nav>
+
+<h1 class="g">Дизайн-система</h1>
+<p class="sub">Пересобрана 3 августа. Прежняя версия описывала систему двух миров, которой
+больше нет, и с тех пор только патчилась по палитре — то есть документировала то, чего
+не существует. Этот файл — источник истины: если страница расходится с ним, права не
+обязательно страница. Расхождение нужно либо внести сюда, либо убрать оттуда.</p>
+
+<!-- ══════════ ПРАВИЛА ══════════ -->
+<section>
+  <h2>Правила</h2>
+  <p class="lede">Шесть правил, из которых выводится всё остальное. Каждое проверялось
+  на практике и каждое хотя бы раз пришлось защищать от нарушения.</p>
+  <div class="rules">
+    <div class="rule"><div class="n g">1</div><div>
+      <b>Свечение помечает живое</b>
+      <span>Не украшение, а состояние. Светится то, что происходит сейчас или скоро:
+      текущая фаза сезона, ближайший показ, активный фильтр, линия «сейчас».
+      Проверяется от обратного — <b>в архиве не светится ничего</b>, кроме карточки
+      текущего сезона.</span></div></div>
+    <div class="rule"><div class="n g">2</div><div>
+      <b>Разделителей нет</b>
+      <span>Ни одной линейки в 1px на всём сайте. Разделяют зазор (1–2px фона),
+      заливка поверхности и падение света. Там, где нужна шкала — например, часы
+      в расписании, — используются чередующиеся полосы: полоса это поверхность,
+      а не разделитель.</span></div></div>
+    <div class="rule"><div class="n g">3</div><div>
+      <b>Цвета нет</b>
+      <span>Только свет и его отсутствие. Все серые нейтральны, максимальный разброс
+      каналов 9/255 — ниже порога, на котором глаз читает оттенок. Иерархия задаётся
+      светлотой, категория — словом.</span></div></div>
+    <div class="rule"><div class="n g">4</div><div>
+      <b>Категорию называет слово</b>
+      <span>Не цвет, не толщина, не значок. Для номинальной переменной нельзя брать
+      порядковый канал: светлота, вес и размер выстраиваются в ряд «больше — меньше»
+      и читаются как важность. Проверено трижды, все три кодировки убраны.</span></div></div>
+    <div class="rule"><div class="n g">5</div><div>
+      <b>Текстура принадлежит материалу</b>
+      <span>Растр лежит на фотографиях, потому что напечатана фотография. Поверх страницы
+      наложений нет: страница — не бумага, а тёмный зал. Если текстура не отвечает
+      на вопрос «что это за поверхность» — это фильтр.</span></div></div>
+    <div class="rule"><div class="n g">6</div><div>
+      <b>Один интерактивный примитив</b>
+      <span>Кликается только <code>.b</code>. Две заливки, два размера, ничего больше.
+      Всё остальное — поверхности, которые реагируют на наведение, но не притворяются
+      кнопками.</span></div></div>
+  </div>
+</section>
+
+<!-- ══════════ ТОКЕНЫ ══════════ -->
+<section>
+  <h2>Токены</h2>
+  <p class="lede">Контраст измерен относительно <code>--bg</code>. Проверялся по самой
+  светлой точке фонового градиента (<code>#1A1A22</code>), а не по базовому цвету, —
+  именно там градиентные фоны обычно ломают палитру.</p>
+  <div class="tok">
+    <div class="tk"><div class="sw" style="background:#08080A;box-shadow:inset 0 0 0 1px var(--edge)"></div>
+      <code>--bg</code><span class="v">#08080A</span><span class="r">фон</span></div>
+    <div class="tk"><div class="sw" style="background:rgba(242,242,244,.045)"></div>
+      <code>--surface</code><span class="v">4.5% белого</span><span class="r">подложка</span></div>
+    <div class="tk"><div class="sw" style="background:rgba(242,242,244,.10)"></div>
+      <code>--surface-2</code><span class="v">10% белого</span><span class="r">наведение</span></div>
+    <div class="tk"><div class="sw" style="background:rgba(242,242,244,.16)"></div>
+      <code>--edge</code><span class="v">16% белого</span><span class="r">контур</span></div>
+    <div class="tk"><div class="sw" style="background:#F2F2F4"></div>
+      <code>--ink</code><span class="v">#F2F2F4</span><span class="r aaa">17.90:1 · AAA</span></div>
+    <div class="tk"><div class="sw" style="background:#9A9AA2"></div>
+      <code>--dim</code><span class="v">#9A9AA2</span><span class="r aaa">7.16:1 · AAA</span></div>
+    <div class="tk"><div class="sw" style="background:#6E6E77"></div>
+      <code>--dimmer</code><span class="v">#6E6E77</span><span class="r">3.96:1 · только капс</span></div>
+  </div>
+</section>
+
+<!-- ══════════ ТИПОГРАФИКА ══════════ -->
+<section>
+  <h2>Типографика</h2>
+  <p class="lede"><b>Golos Text</b> — дисплейный, 500 и 600. Самый нейтральный из семи
+  проверенных: шрифт уходит и оставляет работать свет, масштаб и кадр.
+  <b>Inter</b> — весь остальной текст и все цифры. Табличные цифры обязательны:
+  без них время в расписании не выравнивается по вертикали.</p>
+  <div class="type">
+    <div class="ty"><div class="k">Дисплей 600<i>Golos Text</i></div>
+      <div class="g" style="font-weight:600;font-size:40px;letter-spacing:-.02em;line-height:1.06">17.09 — 20.09</div></div>
+    <div class="ty"><div class="k">Заголовок 600<i>Golos Text</i></div>
+      <div class="g" style="font-weight:600;font-size:26px;letter-spacing:-.012em">Сезон «Переход»</div></div>
+    <div class="ty"><div class="k">Подзаголовок 500<i>Golos Text</i></div>
+      <div class="g" style="font-weight:500;font-size:17px">Кураторская программа «По ту сторону»</div></div>
+    <div class="ty"><div class="k">Основной 400<i>Inter, мера 64 знака</i></div>
+      <div style="font-size:16.5px;line-height:1.76;color:var(--dim);max-width:64ch;text-align:justify;hyphens:auto">Работа
+      с архивной плёнкой как с материалом памяти: изображение проявляется и исчезает,
+      оставляя след там, где сюжет уже невозможен.</div></div>
+    <div class="ty"><div class="k">Метаданные 400<i>Inter, tabular-nums</i></div>
+      <div style="font-size:12px;color:var(--dim)">Горка <i style="color:var(--dimmer);font-style:normal;padding:0 6px">|</i>
+      19:00 <i style="color:var(--dimmer);font-style:normal;padding:0 6px">|</i> 82 мин
+      <i style="color:var(--dimmer);font-style:normal;padding:0 6px">|</i> 16 мм</div></div>
+    <div class="ty"><div class="k">Подпись категории 600<i>Inter, 9px, .17em</i></div>
+      <div style="font-size:9px;letter-spacing:.17em;text-transform:uppercase;color:var(--dimmer)">Кураторская программа</div></div>
+  </div>
+</section>
+
+<!-- ══════════ ПРИМИТИВ ══════════ -->
+<section>
+  <h2>Примитив <code>.b</code></h2>
+  <p class="lede">Матовое стекло со свечением позади. На наведении заливка поднимается,
+  контур яркнет и сзади разрастается размытый свет — элемент <b>загорается</b>, а не едет.
+  Две заливки: тихая по умолчанию и <code>.b--on</code> для активного состояния
+  (оно же срабатывает от <code>aria-pressed="true"</code>, так что фильтры и переключатели
+  не требуют отдельного класса). Два размера: 40 и 34 px.</p>
+  <div class="demo">
+    <button class="b"><span>Обычная</span></button>
+    <button class="b b--on"><span>Активная</span></button>
+    <button class="b b--sm"><span>Малая</span></button>
+    <button class="b b--sm" aria-pressed="true"><span>Фильтр включён</span></button>
+    <a class="b" href="#"><span>Ссылка</span></a>
+  </div>
+</section>
+
+<!-- ══════════ ПОДПИСЬ + СТРОКА ══════════ -->
+<section>
+  <h2>Строка списка</h2>
+  <p class="lede">Базовый строительный блок каталога. Подпись категории стоит
+  <b>перед названием</b> — один и тот же слот на всём сайте: полоса в расписании,
+  тип материала в карточке, фаза сезона на главной, вид показа в архиве.
+  Разделителей между строками нет, только зазор в 1px.</p>
+  <div class="demo col">
+    <div class="row"><div>
+      <div class="k">Фестиваль</div>
+      <div class="t g">Открытие / Нож в сердце Европы</div>
+      <div class="m">Горка <i>|</i> 19:00 <i>|</i> 82 мин <i>|</i> 16 мм</div></div>
+      <button class="b b--sm"><span>Билет</span></button></div>
+    <div class="row"><div>
+      <div class="k">Лаборатория</div>
+      <div class="t g">Ридинг-группа / лиминальный образ</div>
+      <div class="m">Дом Радио <i>|</i> 14:00 <i>|</i> 120 мин</div></div>
+      <button class="b b--sm"><span>Запись</span></button></div>
+    <div class="row"><div>
+      <div class="k">Эхо</div>
+      <div class="t g">Калининград</div>
+      <div class="m">онлайн <i>|</i> 21:00 <i>|</i> 76 мин</div></div>
+      <button class="b b--sm"><span>Билет</span></button></div>
+  </div>
+</section>
+
+<!-- ══════════ ИЗОБРАЖЕНИЯ ══════════ -->
+<section>
+  <h2>Изображения</h2>
+  <p class="lede">Два слоя: фильтр <code>--img</code> (обесцвечивание, контраст 1.3,
+  яркость .62) и <b>чёрный</b> растр 4px в режиме overlay. Точки чёрные, а не белые:
+  это краска, разбитая в грубый растр, — фотография выглядит репродуцированной.
+  Справа то же изображение без обработки, для сравнения.</p>
+  <div class="tiles">
+    <figure class="tile"><div class="im" style="background:radial-gradient(90% 70% at 42% 20%,#8A8A92,#2A2A30 58%,#0C0C10)"></div>
+      <figcaption>С обработкой</figcaption></figure>
+    <figure class="tile"><div class="im" style="background:linear-gradient(148deg,#6E6E76,#1A1A1F 62%,#0B0B0E)"></div>
+      <figcaption>С обработкой</figcaption></figure>
+    <figure class="tile raw"><div class="im" style="background:radial-gradient(90% 70% at 42% 20%,#8A8A92,#2A2A30 58%,#0C0C10)"></div>
+      <figcaption>Без обработки</figcaption></figure>
+  </div>
+</section>
+
+<!-- ══════════ СВЕЧЕНИЕ ══════════ -->
+<section>
+  <h2>Свечение</h2>
+  <p class="lede">Три ступени. Правило одно: <b>светится живое</b>. Касание — наведение
+  и мелкие активные состояния. Активное — текущий фильтр, ближайшее событие, линия
+  «сейчас». Сезон — текущая фаза на главной, единственное место с третьей ступенью.</p>
+  <div class="glows">
+    <div class="gl g1"><div class="dot"></div><code>--glow-1</code><span>Касание</span></div>
+    <div class="gl g2"><div class="dot"></div><code>--glow-2</code><span>Активное</span></div>
+    <div class="gl g3"><div class="dot"></div><code>--glow-3</code><span>Текущая фаза</span></div>
+  </div>
+  <p class="lede" style="margin-top:26px">Проверка от обратного: 7 применений на расписании,
+  6 на материале, 4 на программе, 3 на странице фильма — и <b>1 в архиве</b>, у карточки
+  текущего сезона. Если бы архив светился как главная, значит свечение было украшением.</p>
+</section>
+
+<!-- ══════════ ПОЛОСЫ ══════════ -->
+<section>
+  <h2>Шкала без линеек</h2>
+  <p class="lede">Там, где нужна измерительная сетка — часы в расписании, — вместо линий
+  идут чередующиеся полосы <code>rgba(242,242,244,.022)</code>. Полоса это поверхность,
+  а не разделитель, поэтому правило 2 остаётся целым.</p>
+  <div class="bands">
+    <div>12:00</div><div>13:00</div><div>14:00</div><div>15:00</div><div>16:00</div>
+  </div>
+</section>
+
+<!-- ══════════ ОТВЕРГНУТО ══════════ -->
+<section>
+  <h2>Отвергнуто</h2>
+  <p class="lede">То, что было спроектировано, собрано и убрано. В системе это полезнее
+  списка того, что осталось: показывает, где границы, и не даёт вернуться на второй круг.</p>
+  <div class="rej">
+    <div class="rj"><div><b>Два мира: реальность / по ту сторону</b>
+      <div class="d">D-023 → D-079</div></div>
+      <div class="why">Светлый и тёмный регистр с переключателем. Отменено: сайт и есть зал,
+      тёмное — условие просмотра кино, а не тема. Переключатель тихо утверждал,
+      что условие необязательно. Плюс удвоение работы над каждым будущим компонентом.</div></div>
+    <div class="rj"><div><b>Акцентный цвет</b>
+      <div class="d">коралловый → кислотно-зелёный → нет</div></div>
+      <div class="why">Две попытки подобрать акцент провалились, третьим ответом было,
+      что его нет. Шесть из восьми присланных референсов монохромные. Проектор излучает
+      свет, а не оттенок.</div></div>
+    <div class="rj"><div><b>Кодировка полос: цвет, толщина, знак</b>
+      <div class="d">D-037 → D-090</div></div>
+      <div class="why">Три подхода подряд. Толщина кодирует величину, а не категорию.
+      Знак номинально верен, но требует легенды. Осталось слово — оно всё это время
+      делало работу одно.</div></div>
+    <div class="rj"><div><b>Текстура поверх страницы</b>
+      <div class="d">D-082 → D-089</div></div>
+      <div class="why">Зерно, дизер и полутон на весь вьюпорт. Ошибка категории: страница
+      не бумага, а тёмный зал. Растр остался только на изображениях.</div></div>
+    <div class="rj"><div><b>Скругления по всему сайту</b>
+      <div class="d">D-043, уточнено D-096</div></div>
+      <div class="why">Прямой угол — правило. Единственное исключение — док: он стеклянная
+      панель, отдельный объект. Токены <code>--r-dock</code> и <code>--r-in</code>
+      объявлены отдельно именно поэтому.</div></div>
+  </div>
+</section>
+
+<!-- ══════════ РАСХОЖДЕНИЯ ══════════ -->
+<section>
+  <h2>Расхождения, найденные при пересборке</h2>
+  <p class="lede">Прежде чем писать этот файл, я сверил токены и примитив по всем шести
+  страницам программно. Нашлось два расхождения — одно ложное, одно настоящее.</p>
+  <div class="drift">
+    <div class="dr"><b>Токены</b><div>
+      <code>--surface</code> и <code>--edge</code> в архиве глуше (.04 и .13 против .045 и .16).
+      <div class="fix"><b>Ложное расхождение</b> — это осознанное решение, а не дрейф.
+      Оформлено как задокументированный вариант <code>[data-mode="archive"]</code>
+      вместо переопределения по месту. Остальные 17 токенов совпадают во всех файлах.</div></div></div>
+    <div class="dr"><b>Примитив <code>.b</code></b><div>
+      Пять вариантов высоты и заливки: 36 / 38 / 40 / 42 px, фон .028 или .07.
+      <div class="fix"><b>Настоящий дрейф.</b> Возник оттого, что каждая страница носит
+      свою копию CSS. Канон: высота <code>--h-ctl</code> 40 px, малый размер 34 px,
+      тихая заливка .028 по умолчанию, <code>.b--on</code> и
+      <code>aria-pressed="true"</code> — .07.</div></div></div>
+    <div class="dr"><b>Дублирование</b><div>
+      1130 строк CSS суммарно, <code>:root</code> и <code>.b</code> повторяются в каждом
+      из семи файлов.
+      <div class="fix">Это цена прототипов на статических файлах, а не ошибка.
+      В сборке на Next.js всё это станет одним слоем токенов и одним компонентом —
+      именно поэтому дрейф важно было зафиксировать <b>до</b> переноса в код,
+      а не после.</div></div></div>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,32 @@
+.wrap{max-width:1180px;margin:0 auto;padding:120px 40px 110px}
+.head{display:grid;grid-template-columns:1fr 186px;gap:2px}
+.still{aspect-ratio:16/9}
+.still img{display:block;width:100%;height:100%;object-fit:cover;filter:var(--img)}
+.rail{background:var(--surface);padding:20px 18px;display:flex;flex-direction:column;gap:17px}
+.rail div{font-size:9px;letter-spacing:.17em;text-transform:uppercase;color:var(--dimmer)}
+.rail div b{display:block;font-family:var(--font-golos),sans-serif;font-weight:500;
+  font-size:12.5px;letter-spacing:0;text-transform:none;color:var(--ink);margin-top:5px}
+.title{margin-top:34px}
+.h1{font-weight:600;font-size:clamp(28px,4.6vw,50px);letter-spacing:-.018em;
+  text-transform:uppercase;margin:11px 0 0;line-height:1.08}
+.shead{font-weight:500;font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--dimmer);margin:70px 0 22px}
+.sc{display:grid;grid-template-columns:112px 1fr auto;gap:26px;align-items:center;
+  padding:17px 20px}
+.yr{font-weight:600;font-size:19px;letter-spacing:-.01em}
+.w{font-size:12.5px;color:var(--dim);margin-top:5px}
+.w i{color:var(--dimmer);font-style:normal;padding:0 6px}
+/* прошедший сеанс приглушён, но не спрятан */
+.past{opacity:.5}
+.arch{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dimmer)}
+@media(max-width:880px){
+  .wrap{padding:110px 20px 90px}
+  .head{grid-template-columns:1fr}
+  .rail{flex-direction:row;flex-wrap:wrap;gap:20px 30px}
+  .sc{grid-template-columns:76px 1fr;gap:16px}
+}
+
+.orig{font-size:13px;color:var(--dimmer);margin-top:9px;letter-spacing:.05em}
+.syn{max-width:64ch;font-size:15.5px;line-height:1.74;color:var(--dim);margin:28px 0 0;
+  text-align:justify;hyphens:auto}
+@media(max-width:880px){.syn{text-align:left}}

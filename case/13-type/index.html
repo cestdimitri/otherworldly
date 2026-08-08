@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Выбор дисплейного шрифта</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- По одной ссылке на семейство: если какое-то не отдастся, остальные не пострадают.
+     Один общий запрос с несколькими family= роняет всю таблицу целиком. -->
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;600;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;600;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;600;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#08080A;--surface:#101013;--ink:#F2F2F4;--dim:#9A9AA2;--dimmer:#6E6E77;
+  --edge:rgba(242,242,244,.16)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:Inter,-apple-system,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:44px 32px 110px}
+h1{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--dimmer);
+  font-weight:600;margin:0 0 10px}
+.note{color:var(--dim);font-size:14px;max-width:76ch;margin:0 0 26px}
+.note b{color:var(--ink);font-weight:600}
+
+.picker{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.picker button{all:unset;cursor:pointer;padding:10px 16px;font-size:11px;font-weight:600;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--dim);
+  box-shadow:inset 0 0 0 1px var(--edge);transition:.2s}
+.picker button:hover{color:var(--ink)}
+.picker button.on{background:var(--ink);color:var(--bg);box-shadow:none}
+.picker button.bad{color:#6E6E77;text-decoration:line-through}
+.status{font-size:12px;color:var(--dimmer);margin-bottom:44px}
+
+.card{margin-bottom:62px}
+.fname{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--dimmer);
+  margin-bottom:6px;display:flex;gap:13px;align-items:baseline;flex-wrap:wrap;
+  font-family:Inter,sans-serif;font-weight:400}
+.fname b{color:var(--ink);font-size:13px;letter-spacing:.08em}
+.fname .tag{color:var(--dim);letter-spacing:0;text-transform:none;font-size:12px}
+.fname .chk{letter-spacing:.1em;font-size:10px}
+.chk.ok{color:var(--dim)} .chk.no{color:#F2F2F4;background:#3A1416;padding:2px 7px}
+.wordmark{display:block;width:100%;height:auto;fill:var(--ink);margin:14px 0 20px}
+.lines>div{margin:11px 0;line-height:1.05}
+.l-a{font-size:clamp(24px,3.6vw,44px);font-weight:900;letter-spacing:-.025em;text-transform:uppercase}
+.l-b{font-size:clamp(17px,2.3vw,28px);font-weight:600;letter-spacing:-.01em}
+.l-c{font-size:clamp(38px,6.4vw,78px);font-weight:900;letter-spacing:-.04em}
+.l-d{font-size:13px;font-weight:400;color:var(--dim);font-family:Inter,sans-serif;
+  letter-spacing:.04em;text-transform:uppercase}
+.glyphs{font-size:clamp(22px,3vw,36px);font-weight:900;letter-spacing:.04em;color:var(--dim);
+  margin-top:16px}
+.glyphs b{color:var(--ink);font-weight:900}
+.verdict{font-family:Inter,sans-serif;font-weight:400;font-size:12.5px;color:var(--dim);
+  max-width:78ch;margin-top:16px;padding-left:14px;box-shadow:inset 2px 0 0 var(--edge)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Дисплейный шрифт — выбор</h1>
+<p class="note">Unbounded не подошёл. Вместо того чтобы гадать снова — семь кандидатов
+на реальном материале: имя фестиваля во всю ширину, заголовок события, дата, служебная строка
+и проблемная кириллица: <b>Й</b> с бревисом, <b>Щ</b> с выносным элементом, <b>Ж Ф Д Ъ</b>.<br><br>
+Кнопки сверху показывают один шрифт крупно; «Все семь» — сравнение подряд.
+Страница <b>сама проверяет</b>, что каждое семейство действительно загрузилось и содержит
+кириллицу: если нет, кандидат помечается и вычёркивается. Скажите номер — применю везде.</p>
+
+<div class="picker" id="picker"></div>
+<div class="status" id="status">Проверка загрузки шрифтов…</div>
+<div id="cards"></div>
+
+</div>
+<script>
+const FONTS=[
+ {n:"Geologica", w:900, tag:"техничный гротеск",
+  v:"Ближе всего к «проекции»: инженерная, чуть машинная сетка, огромный диапазон весов. Кириллица рисовалась вместе с латиницей, а не добавлялась потом. Самый безопасный и самый «чистый и звонкий» из списка. Сейчас стоит в макетах как временный."},
+ {n:"Onest", w:900, tag:"современный русский гротеск",
+  v:"Спроектирован в первую очередь под кириллицу. Тёплый, чуть гуманистический, очень ровный на мелком кегле. Менее агрессивен, чем Geologica — если хочется, чтобы кричала не типографика, а фотография."},
+ {n:"Commissioner", w:900, tag:"нейтральный с характером",
+  v:"Заменил Archivo: у того кириллица не подтверждается. Commissioner — переменный гротеск с настоящей кириллицей и полным диапазоном до 900. Спокойнее Geologica, но с более живыми деталями, чем Golos."},
+ {n:"Oswald", w:700, tag:"узкий плакатный",
+  v:"Единственный узкий в списке — и потому единственный, у которого «ПО-ТУ-СТОРОННИЙ» влезает в строку без ухищрений. Регистр афиши, ровно тот, что на ваших постерах 2025. Минус: очень узнаваемый, встречается часто."},
+ {n:"Rubik", w:900, tag:"геометрический со срезом",
+  v:"Слегка срезанные углы дают характер без вычурности. На 900 очень массивный. Ближе всех к Unbounded по логике, но спокойнее и уже — если Unbounded не устроил именно шириной, начните отсюда."},
+ {n:"Golos Text", w:900, tag:"нейтральный, Paratype",
+  v:"Самый нейтральный. Никакого характера — и это может быть достоинством: шрифт полностью уходит, остаются свет, масштаб и кадр. Хорошая пара к любому из верхних в роли текстового."},
+ {n:"Russo One", w:400, tag:"один вес, техно",
+  v:"Один вес, широкий, техничный, почти вывесочный. Даёт самый резкий плакат из всех, но негибок: ни светлых, ни сверхжирных начертаний, поэтому годится только как дисплейный."}
+];
+const cards=document.getElementById('cards'), picker=document.getElementById('picker'),
+      statusEl=document.getElementById('status');
+let forced=null;
+
+/* ── реальная проверка: сравниваем ширину строки в кандидате и в запасном шрифте.
+      Совпала — значит шрифт не применился (не загрузился либо в нём нет этих знаков). */
+const probe=document.createElement('canvas').getContext('2d');
+function width(txt,fam,w){ probe.font=`${w} 64px ${fam}`; return probe.measureText(txt).width; }
+function audit(f){
+  const CYR='ЩЖФДЪЙ', LAT='ABCDEFG';
+  const baseC=width(CYR,'monospace',f.w), baseL=width(LAT,'monospace',f.w);
+  const gotC=width(CYR,`'${f.n}',monospace`,f.w), gotL=width(LAT,`'${f.n}',monospace`,f.w);
+  const latin=Math.abs(gotL-baseL)>0.5, cyr=Math.abs(gotC-baseC)>0.5;
+  if(!latin) return {ok:false, why:'не загрузился'};
+  if(!cyr)   return {ok:false, why:'нет кириллицы'};
+  return {ok:true, why:'кириллица есть'};
+}
+
+function render(){
+  const A=FONTS.map(audit);
+  const okCount=A.filter(a=>a.ok).length;
+  statusEl.textContent = `Загрузилось с кириллицей: ${okCount} из ${FONTS.length}`
+    + (okCount<FONTS.length ? ' — помеченные ниже не применились.' : '.');
+
+  picker.innerHTML = `<button class="${forced===null?'on':''}" data-i="-1">Все семь</button>` +
+    FONTS.map((f,i)=>`<button class="${forced===i?'on':''} ${A[i].ok?'':'bad'}" data-i="${i}">${i+1} / ${f.n}</button>`).join('');
+  picker.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i; forced = i<0?null:i; render();
+    scrollTo({top:0,behavior:'smooth'});
+  });
+
+  const list = forced===null ? FONTS.map((f,i)=>[f,i]) : [[FONTS[forced],forced]];
+  cards.innerHTML = list.map(([f,idx])=>{
+    const a=A[idx], F=`'${f.n}',sans-serif`;
+    return `<div class="card" style="font-family:${F};font-weight:${f.w}">
+      <div class="fname"><b>${idx+1} / ${f.n} ${f.w}</b>
+        <span class="tag">${f.tag}</span>
+        <span class="chk ${a.ok?'ok':'no'}">${a.why}</span></div>
+      <svg class="wordmark" viewBox="0 0 1200 108" preserveAspectRatio="xMinYMid meet">
+        <text x="0" y="89" font-size="88" font-family="${f.n}" font-weight="${f.w}"
+              textLength="1200" lengthAdjust="spacing">ПО-ТУ-СТОРОННИЙ</text></svg>
+      <div class="lines">
+        <div class="l-c">17.09 — 20.09</div>
+        <div class="l-a">Сезон «Переход»</div>
+        <div class="l-b">Кураторская программа «По ту сторону»</div>
+        <div class="l-d">Горка | 19:00 | 82 мин | 16 мм</div>
+      </div>
+      <div class="glyphs"><b>Й Щ Ж Ф Д Ъ Ы Э Ю Я</b> &nbsp; 0123456789</div>
+      <div class="verdict">${f.v}</div>
+    </div>`;
+  }).join('');
+}
+
+render();
+// Перерисовать, когда шрифты действительно доедут: до этого и проверка,
+// и textLength в SVG считаются по запасному шрифту и дают неверный результат.
+if(document.fonts && document.fonts.ready){
+  document.fonts.ready.then(()=>{
+    Promise.all(FONTS.map(f=>document.fonts.load(`${f.w} 64px '${f.n}'`,'ПО-ТУ-СТОРОННИЙ')))
+      .then(render).catch(render);
+  });
+}
+setTimeout(render,1200);   // страховка, если FontFaceSet недоступен
+</script>
+</body>
+</html>

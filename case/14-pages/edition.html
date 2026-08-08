@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Otherworldly 2.0, 2025 — По-ту-сторонний</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════ СЕЗОН В АРХИВЕ ═══════
+   Здесь у правила «свечение помечает живое» появляется обратная сторона: в архиве
+   не светится НИЧЕГО. Сезон закрыт — у него нет текущей фазы, нет ближайшего
+   события, нечего покупать. Приём доказывается отсутствием: если бы архив светился
+   так же, как главная, значит свечение было украшением, а не состоянием.
+
+   Всё остаётся полностью читаемым. Приглушены только сигналы действия. */
+
+:root{
+  --bg:#08080A; --surface:rgba(242,242,244,.045); --ink:#F2F2F4;
+  --dim:#9A9AA2; --dimmer:#6E6E77; --edge:rgba(242,242,244,.16);
+  --glow-1:0 0 18px rgba(242,242,244,.10);
+  --glow-2:0 0 42px rgba(242,242,244,.20);
+  --img:grayscale(1) contrast(1.3) brightness(.62);
+  --h-ctl:40px; --h-ctl-sm:34px;   /* канон высот из 11-specimen */
+}
+/* Архивный режим — задокументированный вариант из 11-specimen, а не правка по месту */
+[data-mode="archive"]{
+  --surface:rgba(242,242,244,.04);
+  --edge:rgba(242,242,244,.13);
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;color:var(--ink);font-family:Inter,-apple-system,sans-serif;line-height:1.5;
+  -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;
+  text-shadow:0 0 1px rgba(242,242,244,.18);
+  /* градиент глуше, чем на живых страницах: в архиве проектор выключен */
+  background:radial-gradient(140% 78% at 50% -8%,#141419 0%,#0D0D11 30%,#09090C 62%,#08080A 100%),#08080A;
+  background-attachment:fixed}
+.g{font-family:"Golos Text",Inter,sans-serif}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.b{position:relative;display:inline-flex;align-items:center;justify-content:center;
+  height:var(--h-ctl);padding:0 20px;border:0;cursor:pointer;
+  font-family:Inter,sans-serif;font-weight:600;font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;white-space:nowrap;color:var(--ink);text-decoration:none;
+  background:rgba(242,242,244,.028);box-shadow:inset 0 0 0 1px var(--edge);
+  transition:background .34s ease,box-shadow .34s ease}
+.b>*{position:relative;z-index:1}
+.b::after{content:"";position:absolute;left:50%;top:50%;width:130%;height:230%;z-index:0;
+  transform:translate(-50%,-50%) scale(.55);opacity:0;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(242,242,244,.42),transparent 72%);
+  filter:blur(16px);transition:opacity .42s ease,transform .42s ease}
+.b:hover{background:rgba(242,242,244,.10);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.5),var(--glow-2)}
+.b:hover::after{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.b--on,.b[aria-pressed="true"]{background:rgba(242,242,244,.07);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.22)}
+.b--sm{height:var(--h-ctl-sm);padding:0 15px;font-size:10px;letter-spacing:.13em}
+
+.wrap{max-width:1180px;margin:0 auto;padding:44px 40px 110px}
+.pagenav{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase}
+.pagenav a{color:var(--dimmer);text-decoration:none;transition:.24s}
+.pagenav a:hover{color:var(--ink)}
+.pagenav a[aria-current]{color:var(--ink)}
+
+/* ═══ ШАПКА СЕЗОНА ═══ */
+.state{display:inline-flex;align-items:center;gap:10px;margin-top:34px;
+  font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dimmer)}
+.state::before{content:"";width:7px;height:7px;box-shadow:inset 0 0 0 1px var(--dimmer)}
+.masthead{display:grid;grid-template-columns:auto 1fr;gap:34px;align-items:baseline;
+  margin-top:18px}
+.yr{font-family:"Golos Text",sans-serif;font-weight:600;font-size:clamp(64px,13vw,150px);
+  line-height:.82;letter-spacing:-.045em;color:var(--dim)}
+h1{font-family:"Golos Text",sans-serif;font-weight:600;font-size:clamp(24px,3.6vw,40px);
+  letter-spacing:-.015em;margin:0;line-height:1.12}
+.vec{font-size:14px;color:var(--dim);margin-top:14px;line-height:1.6}
+.vec i{color:var(--dimmer);font-style:normal;padding:0 7px}
+.when{font-size:12.5px;color:var(--dimmer);margin-top:12px;letter-spacing:.03em}
+
+.stmt{max-width:62ch;font-size:15.5px;line-height:1.74;color:var(--dim);margin-top:40px;
+  text-align:justify;hyphens:auto}
+.stmt p{margin:0 0 18px}
+.stmt p:first-child{color:var(--ink)}
+
+/* ═══ ЦИФРЫ ═══ */
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+  margin-top:44px}
+.fig{background:var(--surface);padding:20px}
+.fig b{display:block;font-family:"Golos Text",sans-serif;font-weight:600;font-size:32px;
+  line-height:1;letter-spacing:-.02em}
+.fig span{display:block;font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--dimmer);margin-top:10px}
+
+.shead{font-family:"Golos Text",sans-serif;font-weight:500;font-size:12px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--dimmer);margin:76px 0 22px;display:flex;
+  align-items:baseline;gap:14px}
+.shead span{margin-left:auto;font-family:Inter,sans-serif;font-size:11px;letter-spacing:.12em}
+
+/* ═══ ПРОГРАММА СЕЗОНА ═══ */
+.prog{display:grid;gap:1px}
+.row{display:grid;grid-template-columns:78px 1fr auto;gap:24px;align-items:center;
+  background:var(--surface);padding:15px 18px;text-decoration:none;color:inherit;
+  transition:background .26s,box-shadow .26s}
+.row:hover{background:rgba(242,242,244,.085);box-shadow:inset 0 0 0 1px rgba(242,242,244,.14)}
+.row .d{font-size:12px;color:var(--dimmer);letter-spacing:.04em}
+.row .k{font-size:9px;letter-spacing:.17em;text-transform:uppercase;color:var(--dimmer);
+  margin-bottom:5px}
+.row .t{font-family:"Golos Text",sans-serif;font-weight:500;font-size:15px;line-height:1.3}
+.row .c{font-size:11.5px;color:var(--dim);margin-top:5px}
+.row .c i{color:var(--dimmer);font-style:normal;padding:0 6px}
+/* вместо билета — метка состояния. Купить нечего, и интерфейс это признаёт. */
+.arch{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--dimmer);
+  white-space:nowrap}
+
+/* ═══ ГАЛЕРЕЯ ═══ */
+.gal{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:166px;gap:2px}
+.shot{position:relative;overflow:hidden;background:var(--surface)}
+.shot .im{position:absolute;inset:0;filter:var(--img);
+  transition:transform .7s cubic-bezier(.66,0,.16,1)}
+.shot::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.3;
+  mix-blend-mode:overlay;
+  background-image:radial-gradient(rgba(0,0,0,.9) 1px,transparent 1.2px);background-size:4px 4px}
+.shot:hover .im{transform:scale(1.04)}
+.shot figcaption{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:12px 13px;
+  font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#F2F2F4;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.78));
+  opacity:0;transform:translateY(5px);transition:.3s cubic-bezier(.66,0,.16,1)}
+.shot:hover figcaption{opacity:1;transform:none}
+.shot.wide{grid-column:span 2} .shot.big{grid-column:span 2;grid-row:span 2}
+.im.a{background:radial-gradient(90% 70% at 42% 20%,#8A8A92,#2A2A30 58%,#0C0C10)}
+.im.b{background:radial-gradient(70% 90% at 70% 76%,#7C7C84,#242429 60%,#0A0A0D)}
+.im.c{background:linear-gradient(148deg,#6E6E76,#1A1A1F 62%,#0B0B0E)}
+.im.d{background:radial-gradient(60% 60% at 28% 62%,#94949C,#2E2E34 55%,#0D0D11)}
+.im.e{background:linear-gradient(28deg,#0B0B0E,#3A3A41 48%,#8E8E96)}
+
+/* ═══ МАТЕРИАЛЫ ═══ */
+.mats{display:grid;gap:1px}
+.mat{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;
+  background:var(--surface);padding:15px 18px;text-decoration:none;color:inherit;
+  transition:background .26s,box-shadow .26s}
+.mat:hover{background:rgba(242,242,244,.085);box-shadow:inset 0 0 0 1px rgba(242,242,244,.14)}
+.mat .k{font-size:9px;letter-spacing:.17em;text-transform:uppercase;color:var(--dimmer);
+  margin-bottom:5px}
+.mat .t{font-family:"Golos Text",sans-serif;font-weight:500;font-size:14.5px;line-height:1.32}
+.mat .w{font-size:11px;color:var(--dimmer);white-space:nowrap}
+
+/* ═══ ДРУГИЕ СЕЗОНЫ ═══ */
+.eds{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1px}
+.ed{background:var(--surface);padding:24px 22px;text-decoration:none;color:inherit;
+  transition:background .28s,box-shadow .28s}
+.ed:hover{background:rgba(242,242,244,.085);box-shadow:inset 0 0 0 1px rgba(242,242,244,.14)}
+.ed b{display:block;font-family:"Golos Text",sans-serif;font-weight:600;font-size:34px;
+  line-height:1;letter-spacing:-.025em;color:var(--dim)}
+.ed .n{font-family:"Golos Text",sans-serif;font-weight:500;font-size:15px;margin-top:12px}
+.ed .s{font-size:11.5px;color:var(--dimmer);margin-top:8px;line-height:1.55}
+/* текущий сезон — единственное, что здесь светится */
+.ed.live b,.ed.live .n{color:var(--ink)}
+.ed.live{box-shadow:inset 0 0 0 1px rgba(242,242,244,.2)}
+.ed.live .s{color:var(--dim)}
+.ed.live .now{display:inline-block;margin-top:12px;font-size:9px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--ink);text-shadow:var(--glow-1)}
+
+.note{margin-top:76px;font-size:12px;color:var(--dimmer);max-width:74ch;line-height:1.7}
+.note b{color:var(--dim);font-weight:500}
+
+@media(max-width:900px){
+  .wrap{padding:32px 20px 90px}
+  .masthead{grid-template-columns:1fr;gap:16px}
+  .stmt{text-align:left}
+  .row{grid-template-columns:64px 1fr;gap:14px}
+  .row .arch{grid-column:1/-1}
+  .gal{grid-template-columns:repeat(2,1fr);grid-auto-rows:140px}
+}
+</style>
+</head>
+<body data-mode="archive">
+<div class="wrap">
+
+  <nav class="pagenav">
+    <a href="../12-homepage/index.html">← Главная</a>
+    <a href="timetable.html">Расписание</a>
+    <a href="programme.html">Программа</a>
+    <a href="film.html">Фильм</a>
+    <a href="article.html">Материал</a>
+    <a href="edition.html" aria-current="page">Архив</a>
+  </nav>
+
+  <div class="state">Сезон закрыт</div>
+  <div class="masthead">
+    <div class="yr g">2025</div>
+    <div>
+      <h1 class="g">Otherworldly 2.0</h1>
+      <div class="vec">Нейрометаморфозы <i>/</i> граница <i>/</i> след <i>/</i> чувственность</div>
+      <div class="when">12—14 сентября 2025 · Санкт-Петербург, мастерская «Горка».
+        Эхо: Москва, Выборг, Калининград</div>
+    </div>
+  </div>
+
+  <div class="stmt">
+    <p>Второй сезон собирался вокруг вопроса о том, что происходит с изображением, когда
+    оно перестаёт быть чьим-то — когда его больше никто не смотрит, но оно всё ещё есть.</p>
+    <p>Четыре вектора задавались не как темы для отбора, а как способы смотреть. Граница
+    интересовала нас не как сюжет, а как место, где изображение меняет плотность.
+    След — как то, что остаётся, когда убрали причину. Чувственность — как единственный
+    способ проверить, что мы вообще что-то увидели.</p>
+    <p>Из 214 присланных работ в программу вошли 24. Половина показов шла с плёнки.</p>
+  </div>
+
+  <div class="figs">
+    <div class="fig"><b>24</b><span>фильма</span></div>
+    <div class="fig"><b>9</b><span>программ</span></div>
+    <div class="fig"><b>4</b><span>города</span></div>
+    <div class="fig"><b>214</b><span>заявок</span></div>
+    <div class="fig"><b>612</b><span>зрителей</span></div>
+  </div>
+
+  <div class="shead">Программа сезона <span>9 из 9</span></div>
+  <div class="prog">
+    <a class="row" href="film.html"><div class="d">12.09 · 19:00</div>
+      <div><div class="k">Фильм открытия</div><div class="t">Нож в сердце Европы</div>
+        <div class="c">Анна Цирлина <i>|</i> RU 2025 <i>|</i> 82 мин <i>|</i> 16 мм</div></div>
+      <div class="arch">Архив</div></a>
+    <a class="row" href="film.html"><div class="d">12.09 · 21:30</div>
+      <div><div class="k">Кураторская программа</div><div class="t">По ту сторону</div>
+        <div class="c">сборная программа <i>|</i> 6 работ <i>|</i> 94 мин</div></div>
+      <div class="arch">Архив</div></a>
+    <a class="row" href="film.html"><div class="d">13.09 · 14:00</div>
+      <div><div class="k">Спецпрограмма</div><div class="t">Анна Цирлина &amp; Сид Яндовка</div>
+        <div class="c">разговор и показ <i>|</i> 120 мин</div></div>
+      <div class="arch">Архив</div></a>
+    <a class="row" href="film.html"><div class="d">13.09 · 17:00</div>
+      <div><div class="k">Кураторская программа</div><div class="t">Линия отражения</div>
+        <div class="c">сборная программа <i>|</i> 5 работ <i>|</i> 88 мин <i>|</i> 16 мм</div></div>
+      <div class="arch">Архив</div></a>
+    <a class="row" href="film.html"><div class="d">13.09 · 20:00</div>
+      <div><div class="k">Спецпрограмма</div><div class="t">Вадим Костров</div>
+        <div class="c">RU 2024 <i>|</i> 76 мин</div></div>
+      <div class="arch">Архив</div></a>
+    <a class="row" href="film.html"><div class="d">14.09 · 15:00</div>
+      <div><div class="k">Кураторская программа</div><div class="t">Разговор с другом</div>
+        <div class="c">сборная программа <i>|</i> 4 работы <i>|</i> 71 мин</div></div>
+      <div class="arch">Архив</div></a>
+    <a class="row" href="film.html"><div class="d">14.09 · 18:00</div>
+      <div><div class="k">Кураторская программа</div><div class="t">Вокруг да около</div>
+        <div class="c">сборная программа <i>|</i> 5 работ <i>|</i> 83 мин</div></div>
+      <div class="arch">Архив</div></a>
+    <a class="row" href="film.html"><div class="d">14.09 · 21:00</div>
+      <div><div class="k">Фильм закрытия</div><div class="t">Нейрометаморфозы</div>
+        <div class="c">Полина Трубицына <i>|</i> RU 2025 <i>|</i> 64 мин <i>|</i> 16 мм</div></div>
+      <div class="arch">Архив</div></a>
+    <a class="row" href="film.html"><div class="d">21.09 · 18:00</div>
+      <div><div class="k">Эхо</div><div class="t">Выборг, Москва, Калининград</div>
+        <div class="c">избранное из программы <i>|</i> 3 города</div></div>
+      <div class="arch">Архив</div></a>
+  </div>
+
+  <div class="shead">Съёмка <span>68 кадров</span></div>
+  <div class="gal">
+    <figure class="shot big"><div class="im a"></div>
+      <figcaption>Горка / открытие / 12.09.25</figcaption></figure>
+    <figure class="shot"><div class="im b"></div><figcaption>Проекция 16 мм</figcaption></figure>
+    <figure class="shot"><div class="im c"></div><figcaption>Разговор после показа</figcaption></figure>
+    <figure class="shot wide"><div class="im e"></div><figcaption>Стена афиш</figcaption></figure>
+    <figure class="shot"><div class="im d"></div><figcaption>Зал перед началом</figcaption></figure>
+    <figure class="shot"><div class="im c"></div><figcaption>Эхо / Выборг</figcaption></figure>
+  </div>
+
+  <div class="shead">Материалы сезона</div>
+  <div class="mats">
+    <a class="mat" href="article.html">
+      <div><div class="k">Интервью</div>
+        <div class="t">«Плёнка помнит дольше, чем мы» — разговор с Анной Цирлиной</div></div>
+      <div class="w">28.07.2026</div></a>
+    <a class="mat" href="article.html">
+      <div><div class="k">Текст</div>
+        <div class="t">Что осталось от второго сезона: заметки о границе и следе</div></div>
+      <div class="w">02.10.2025</div></a>
+    <a class="mat" href="article.html">
+      <div><div class="k">Хроника</div>
+        <div class="t">Самиздат «К!», номер 3: нейрометаморфозы</div></div>
+      <div class="w">14.10.2025</div></a>
+  </div>
+
+  <div class="shead">Другие сезоны</div>
+  <div class="eds">
+    <a class="ed" href="edition.html"><b class="g">2024</b>
+      <div class="n g">Otherworldly 1.0</div>
+      <div class="s">Призрачность образа, хонтология, потустороннее. 17 фильмов, 3 города.</div></a>
+    <a class="ed live" href="../12-homepage/index.html"><b class="g">2026</b>
+      <div class="n g">Сезон 03 — «Переход»</div>
+      <div class="s">17—20 сентября, Санкт-Петербург. Опен колл открыт.</div>
+      <div class="now">Идёт сейчас</div></a>
+  </div>
+
+  <div class="note">
+    <b>В архиве не светится ничего.</b> Правило «свечение помечает живое» доказывается здесь
+    отсутствием: сезон закрыт, у него нет текущей фазы, нет ближайшего события и нечего
+    покупать. Если бы архив светился так же, как главная, значит свечение было украшением,
+    а не состоянием. Единственное исключение — карточка текущего сезона внизу: она и есть
+    живое.
+    <b>Вместо кнопки билета — метка «Архив».</b> Интерфейс признаёт, что действие невозможно,
+    вместо того чтобы предлагать кнопку, которая ничего не сделает.
+    <b>Градиент фона глуше</b>, чем на живых страницах: проектор выключен.
+    При этом ничего не спрятано и всё читаемо — приглушены сигналы действия, а не содержание.
+  </div>
+
+</div>
+</body>
+</html>

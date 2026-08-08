@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>По-ту-сторонний</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════ ПРОЕКЦИЯ ═══════════
+   Сайт — зал. Один мир, переключателя нет: тёмное это и есть условие кино.
+   Свет приходит только сверху, из проектора, и всё, что важно, — светится.
+   Печать по дешёвой бумаге живёт на изображениях, а не поверх страницы.   */
+
+:root{
+  --bg:#08080A; --surface:rgba(242,242,244,.045); --ink:#F2F2F4;
+  --dim:#9A9AA2; --dimmer:#6E6E77; --edge:rgba(242,242,244,.16);
+  --glow-1:0 0 18px rgba(242,242,244,.10);
+  --glow-2:0 0 42px rgba(242,242,244,.20);
+  --glow-3:0 0 90px rgba(242,242,244,.30);
+  --img:grayscale(1) contrast(1.3) brightness(.62);
+  /* Скругления живут ТОЛЬКО в доке. Остальная страница остаётся прямоугольной.
+     Чтобы распространить на весь сайт — заменить 0 на var(--r-in) в .b. */
+  --r-dock:20px; --r-in:12px;
+  --h-ctl:40px; --h-ctl-sm:34px;   /* канон высот из 11-specimen */
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;color:var(--ink);
+  font-family:Inter,-apple-system,"Helvetica Neue",Arial,sans-serif;line-height:1.5;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;font-variant-numeric:tabular-nums;
+  /* градиент фона: источник света сверху, к низу зал гаснет */
+  background:
+    radial-gradient(140% 78% at 50% -8%, #1A1A22 0%, #101015 26%, #0A0A0D 58%, #08080A 100%),
+    #08080A;
+  background-attachment:fixed}
+.g{font-family:"Golos Text",Inter,sans-serif}
+
+/* ── ПЕЧАТЬ: растр только на изображениях. Поверх страницы наложений нет ── */
+/* ink bloom — краска слегка растекается по волокну */
+body,.dock,.menu{text-shadow:0 0 1px rgba(242,242,244,.22)}
+.g{text-shadow:0 0 2px rgba(242,242,244,.20)}
+
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ═══ ЕДИНСТВЕННЫЙ ПРИМИТИВ: полупрозрачный, со свечением позади ═══ */
+.b{position:relative;display:inline-flex;align-items:center;justify-content:center;
+  height:var(--h-ctl);padding:0 20px;border:0;cursor:pointer;
+  font-family:Inter,sans-serif;font-weight:600;font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;white-space:nowrap;color:var(--ink);text-decoration:none;
+  background:rgba(242,242,244,.028);box-shadow:inset 0 0 0 1px var(--edge);
+  transition:background .34s ease,box-shadow .34s ease}
+.b>*{position:relative;z-index:1}
+.b::after{content:"";position:absolute;left:50%;top:50%;width:130%;height:230%;z-index:0;
+  transform:translate(-50%,-50%) scale(.55);opacity:0;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(242,242,244,.42),transparent 72%);
+  filter:blur(16px);transition:opacity .42s ease,transform .42s ease}
+.b:hover{background:rgba(242,242,244,.10);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.5),var(--glow-2)}
+.b:hover::after{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.b--on,.b[aria-pressed="true"]{background:rgba(242,242,244,.07);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.22)}
+.b--sm{height:var(--h-ctl-sm);padding:0 15px;font-size:10px;letter-spacing:.13em}
+
+/* свечение позади — увеличивается и проявляется */
+.b::after{content:"";position:absolute;left:50%;top:50%;width:130%;height:230%;z-index:0;
+  transform:translate(-50%,-50%) scale(.55);opacity:0;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(242,242,244,.42),transparent 72%);
+  filter:blur(16px);
+  transition:opacity .42s cubic-bezier(.4,0,.2,1),transform .42s cubic-bezier(.4,0,.2,1)}
+.b:hover{background:rgba(242,242,244,.13);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.5), var(--glow-2)}
+.b:hover::after{opacity:1;transform:translate(-50%,-50%) scale(1)}
+
+/* ═══ ДОК ═══
+   Стеклянная панель в луче. Прозрачнее фона, сильнее размытие — проекция
+   должна читаться СКВОЗЬ неё, а не за ней.
+   Край собран из трёх слоёв вместо одной жёсткой линейки:
+   блик по верхней кромке (свет идёт сверху, оттуда же, откуда луч),
+   мягкий контур и тень наружу. Граница получается растушёванной. */
+.dock{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:70;
+  display:flex;align-items:center;gap:30px;padding:11px 14px 11px 22px;
+  max-width:calc(100vw - 32px);border-radius:var(--r-dock);
+  background:rgba(16,16,21,.34);
+  backdrop-filter:blur(30px) saturate(1.35);
+  -webkit-backdrop-filter:blur(30px) saturate(1.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.11),      /* блик сверху */
+    inset 0 0 0 1px rgba(242,242,244,.085),   /* мягкий контур */
+    0 18px 50px rgba(0,0,0,.5),               /* отрыв от страницы */
+    0 2px 10px rgba(0,0,0,.32);
+  transition:top .3s cubic-bezier(.66,0,.16,1),background .3s ease}
+.dock:hover{background:rgba(16,16,21,.46)}
+.dock.away{top:-140px}
+/* внутри дока углы скруглены заодно — квадрат в скруглённой панели выглядит чужим */
+.dock .b{border-radius:var(--r-in)}
+.dock .burger{border-radius:var(--r-in)}
+.dock nav{display:flex;gap:18px;font-size:12.5px;font-weight:500}
+.dock nav a{position:relative;color:var(--dim);text-decoration:none;transition:.26s;
+  white-space:nowrap}
+.dock nav a:hover{color:var(--ink);text-shadow:var(--glow-1),0 0 3px rgba(242,242,244,.5)}
+.dock .sp{margin-left:auto;display:flex;align-items:center;gap:16px}
+.lang{display:flex;gap:6px;font-size:10.5px;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase}
+.lang button{all:unset;cursor:pointer;color:var(--dimmer);transition:.25s}
+.lang button[aria-pressed="true"]{color:var(--ink);text-shadow:var(--glow-1)}
+.lang s{color:var(--edge);text-decoration:none}
+
+/* бургер */
+/* all:unset обязан идти ПЕРВЫМ: это шорткат, он сбрасывает всё объявленное выше.
+   Пока display:none стоял до него — сбрасывался и бургер висел на десктопе. */
+.burger{all:unset;display:none;cursor:pointer;width:38px;height:38px;position:relative;
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.11);flex:0 0 auto;
+  transition:box-shadow .3s ease,background .3s ease}
+.burger:hover{background:rgba(242,242,244,.07);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.28)}
+.burger i{position:absolute;left:11px;width:16px;height:1px;background:var(--ink);
+  transition:transform .34s cubic-bezier(.66,0,.16,1),opacity .2s}
+.burger i:nth-child(1){top:14px} .burger i:nth-child(2){top:19px} .burger i:nth-child(3){top:24px}
+.burger[aria-expanded="true"] i:nth-child(1){transform:translateY(5px) rotate(45deg)}
+.burger[aria-expanded="true"] i:nth-child(2){opacity:0}
+.burger[aria-expanded="true"] i:nth-child(3){transform:translateY(-5px) rotate(-45deg)}
+.menu{position:fixed;inset:0;z-index:75;display:flex;flex-direction:column;
+  justify-content:center;gap:2px;padding:0 24px;
+  background:radial-gradient(120% 70% at 50% 0%,#16161D,#08080A 70%);
+  opacity:0;pointer-events:none;transition:opacity .32s ease}
+.menu.on{opacity:1;pointer-events:auto}
+.menu a{font-family:"Golos Text",sans-serif;font-weight:500;font-size:clamp(28px,8.6vw,44px);
+  text-transform:uppercase;letter-spacing:-.01em;color:var(--dim);text-decoration:none;
+  padding:10px 0;transition:.26s}
+.menu a:hover,.menu a:focus{color:var(--ink);text-shadow:var(--glow-2)}
+.menu .mfoot{margin-top:34px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--dimmer)}
+
+/* ═══ ПЕРВЫЙ ЭКРАН ═══ */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:flex-end;padding:44px 44px 46px;overflow:hidden}
+.plate{position:absolute;inset:0;z-index:0;filter:var(--img);
+  background:radial-gradient(118% 88% at 50% 6%,#75757C 0%,#3C3C43 33%,#17171B 68%,#0A0A0C 100%)}
+.plate::after{content:"";position:absolute;left:0;right:0;bottom:0;height:36%;
+  background:
+    radial-gradient(46px 62px at 11% 100%,#000 62%,transparent 64%),
+    radial-gradient(53px 71px at 25% 100%,#000 62%,transparent 64%),
+    radial-gradient(42px 57px at 38% 100%,#000 62%,transparent 64%),
+    radial-gradient(57px 75px at 54% 100%,#000 62%,transparent 64%),
+    radial-gradient(44px 60px at 69% 100%,#000 62%,transparent 64%),
+    radial-gradient(50px 66px at 84% 100%,#000 62%,transparent 64%),
+    linear-gradient(180deg,transparent 0%,#000 88%)}
+/* битмап-растр поверх кадра — крупный, видимый */
+.plate-bmp{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.34;
+  mix-blend-mode:overlay;
+  background-image:radial-gradient(rgba(0,0,0,.95) 1.1px,transparent 1.3px);
+  background-size:4px 4px}
+#wave{position:absolute;inset:0;z-index:2;width:100%;height:100%}
+.beamlight{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:.34;
+  background:conic-gradient(from 178deg at 50% -13%,transparent 0deg,
+    rgba(255,255,255,.42) 4deg,rgba(255,255,255,.10) 11deg,transparent 15deg,
+    transparent 345deg,rgba(255,255,255,.10) 349deg,rgba(255,255,255,.42) 356deg,transparent 360deg)}
+.vig{position:absolute;inset:0;z-index:4;pointer-events:none;
+  background:radial-gradient(128% 98% at 50% 20%,transparent 34%,#08080A 100%)}
+.hero-in{position:relative;z-index:6}
+.wordmark{display:block;width:100%;height:auto;fill:var(--ink);
+  filter:drop-shadow(0 0 26px rgba(242,242,244,.34)) drop-shadow(0 0 3px rgba(242,242,244,.5))}
+.wordmark text{font-family:"Golos Text",sans-serif;font-weight:600}
+.wm-narrow{display:none}
+.hero .sub{font-family:"Golos Text",sans-serif;font-weight:500;font-size:clamp(12px,1.5vw,18px);
+  letter-spacing:.01em;text-transform:uppercase;margin-top:24px;
+  display:flex;gap:14px;flex-wrap:wrap;align-items:baseline}
+.hero .sub i{color:var(--dimmer);font-style:normal}
+.hero .lede{font-size:15px;color:var(--dim);max-width:52ch;margin-top:14px}
+.hero-cta{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap}
+
+/* ═══ СЕКЦИИ ═══ */
+main{padding:0 44px 120px;position:relative;z-index:2}
+section{margin-top:120px}
+.shead{font-family:"Golos Text",sans-serif;font-weight:500;font-size:12px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--dimmer);margin:0 0 52px;display:flex;
+  align-items:baseline;gap:16px;position:relative}
+.shead::before{content:"";position:absolute;left:-44px;top:6px;width:22px;height:1px;
+  background:var(--ink);box-shadow:var(--glow-2)}
+.shead a{margin-left:auto;color:var(--ink);text-decoration:none;font-size:11px;transition:.26s}
+.shead a:hover{text-shadow:var(--glow-2)}
+
+/* ── лента сезона ── */
+.tl{position:relative}
+.tl::before{content:"";position:absolute;left:151px;top:6px;bottom:26px;width:1px;
+  background:linear-gradient(180deg,var(--edge) 0%,var(--edge) 20%,var(--ink) 44%,
+    var(--ink) 58%,var(--edge) 80%,transparent 100%)}
+/* ореол вокруг оси — свет, идущий по году */
+.tl::after{content:"";position:absolute;left:145px;top:6px;bottom:26px;width:13px;
+  pointer-events:none;filter:blur(9px);
+  background:linear-gradient(180deg,transparent 0%,rgba(242,242,244,.05) 22%,
+    rgba(242,242,244,.42) 46%,rgba(242,242,244,.42) 58%,rgba(242,242,244,.05) 80%,transparent 100%)}
+.ph{position:relative;display:grid;grid-template-columns:130px 42px 1fr;align-items:start;
+  padding:0 0 78px}
+.ph .when{font-family:"Golos Text",sans-serif;font-weight:500;font-size:11.5px;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--dimmer);padding-top:5px;
+  text-align:right}
+.ph .mk{position:relative;height:11px;margin-top:9px;justify-self:center;z-index:1}
+.ph .mk::after{content:"";position:absolute;left:50%;top:0;width:9px;height:9px;
+  margin-left:-4.5px;background:#08080A;box-shadow:inset 0 0 0 1px var(--dim);transition:.3s}
+.ph.now .mk::after,.ph.next .mk::after{background:var(--ink);
+  box-shadow:inset 0 0 0 1px var(--ink), var(--glow-2)}
+.ph.next .mk::after{width:13px;height:13px;margin-left:-6.5px;top:-2px;
+  box-shadow:inset 0 0 0 1px var(--ink), var(--glow-3)}
+.ph.done{opacity:.4}
+.ph h3{font-family:"Golos Text",sans-serif;font-weight:600;margin:0;line-height:1.12;
+  letter-spacing:-.008em;text-transform:uppercase;font-size:clamp(24px,3.4vw,40px)}
+.ph.next h3{font-size:clamp(30px,5.2vw,64px);line-height:1.06;
+  text-shadow:0 0 34px rgba(242,242,244,.30),0 0 2px rgba(242,242,244,.4)}
+.ph .state{font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--dimmer);margin-bottom:14px}
+.ph.now .state,.ph.next .state{color:var(--ink);text-shadow:var(--glow-1)}
+.ph p{font-size:14px;line-height:1.62;color:var(--dim);margin:18px 0 0;max-width:54ch}
+.ph .act{display:flex;gap:9px;margin-top:20px;flex-wrap:wrap}
+
+.days{margin-top:26px;display:grid;gap:1px}
+.day{display:grid;grid-template-columns:64px 1fr auto;gap:24px;align-items:center;
+  background:var(--surface);padding:16px 18px;
+  transition:padding .24s cubic-bezier(.66,0,.16,1),background .24s,box-shadow .24s}
+.day:hover{padding-left:26px;background:rgba(242,242,244,.085);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.18),var(--glow-1)}
+.day .n{font-family:"Golos Text",sans-serif;font-weight:600;font-size:32px;line-height:.9;
+  letter-spacing:-.015em;color:var(--dimmer);transition:.24s}
+.day:hover .n,.day.hi .n{color:var(--ink);text-shadow:var(--glow-2)}
+.day .t{font-family:"Golos Text",sans-serif;font-weight:500;font-size:15.5px;line-height:1.32}
+.day .m{font-size:11.5px;color:var(--dim);margin-top:5px}
+.day .m i{color:var(--dimmer);font-style:normal;padding:0 7px}
+
+/* ── материалы ── */
+.mat{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:2px}
+.mc{position:relative;background:var(--surface);cursor:pointer;overflow:hidden;
+  display:flex;flex-direction:column;transition:background .3s,box-shadow .3s}
+.mc:hover{background:rgba(242,242,244,.085);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.18),var(--glow-1)}
+.mc .cov{position:relative;aspect-ratio:3/2;overflow:hidden}
+.mc .cov .im{position:absolute;inset:0;filter:var(--img);
+  transition:transform .7s cubic-bezier(.66,0,.16,1)}
+.mc .cov::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.3;
+  mix-blend-mode:overlay;
+  background-image:radial-gradient(rgba(0,0,0,.9) 1px,transparent 1.2px);background-size:4px 4px}
+.mc:hover .cov .im{transform:scale(1.05)}
+.mc .bd{padding:20px 20px 22px;display:flex;flex-direction:column;flex:1}
+.mc .kind{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dimmer)}
+.mc h3{font-family:"Golos Text",sans-serif;font-weight:500;font-size:17px;margin:11px 0 0;
+  line-height:1.34;letter-spacing:-.004em}
+.mc .when{margin-top:auto;padding-top:16px;font-size:11.5px;color:var(--dim)}
+.mc .when i{color:var(--dimmer);font-style:normal;padding:0 6px}
+
+/* ── архив ── */
+.past{display:grid;gap:1px}
+.ed{display:grid;grid-template-columns:132px 1fr auto;gap:32px;align-items:center;
+  background:var(--surface);padding:30px;
+  transition:padding .24s cubic-bezier(.66,0,.16,1),background .24s,box-shadow .24s}
+.ed:hover{padding-left:40px;background:rgba(242,242,244,.085);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.18),var(--glow-1)}
+.ed .y{font-weight:600;font-size:clamp(38px,5vw,58px);line-height:.9;letter-spacing:-.02em;
+  color:var(--dimmer);transition:.24s}
+.ed:hover .y{color:var(--ink);text-shadow:var(--glow-2)}
+.ed h3{font-family:"Golos Text",sans-serif;font-weight:500;font-size:21px;margin:0;
+  letter-spacing:-.005em;line-height:1.3}
+.ed .vec{font-size:12.5px;color:var(--dim);margin-top:8px;letter-spacing:.02em}
+.ed .vec i{color:var(--dimmer);font-style:normal;padding:0 5px}
+.ed p{font-size:13.5px;line-height:1.6;color:var(--dim);margin:12px 0 0;max-width:50ch}
+.ed .fig{font-size:11.5px;color:var(--dimmer);margin-top:12px;display:flex;gap:12px;flex-wrap:wrap}
+.ed .fig i{font-style:normal}
+
+/* ── галерея ── */
+.gal{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:186px;gap:2px}
+.shot{position:relative;overflow:hidden;background:var(--surface);cursor:pointer}
+.shot .im{position:absolute;inset:0;filter:var(--img);
+  transition:transform .7s cubic-bezier(.66,0,.16,1),filter .4s}
+.shot::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.3;
+  mix-blend-mode:overlay;
+  background-image:radial-gradient(rgba(0,0,0,.9) 1px,transparent 1.2px);background-size:4px 4px}
+.shot:hover .im{transform:scale(1.05);filter:grayscale(1) contrast(1.2) brightness(.86)}
+.shot figcaption{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:14px 15px;
+  font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#F2F2F4;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.78));
+  opacity:0;transform:translateY(6px);transition:.32s cubic-bezier(.66,0,.16,1)}
+.shot:hover figcaption{opacity:1;transform:none;text-shadow:var(--glow-1)}
+.shot.wide{grid-column:span 2} .shot.big{grid-column:span 2;grid-row:span 2}
+.im.a{background:radial-gradient(90% 70% at 42% 20%,#8A8A92,#2A2A30 58%,#0C0C10)}
+.im.b{background:radial-gradient(70% 90% at 70% 76%,#7C7C84,#242429 60%,#0A0A0D)}
+.im.c{background:linear-gradient(148deg,#6E6E76,#1A1A1F 62%,#0B0B0E)}
+.im.d{background:radial-gradient(60% 60% at 28% 62%,#94949C,#2E2E34 55%,#0D0D11)}
+.im.e{background:linear-gradient(28deg,#0B0B0E,#3A3A41 48%,#8E8E96)}
+.galfoot{margin-top:18px;font-size:12px;color:var(--dim);display:flex;gap:14px;flex-wrap:wrap}
+.galfoot i{color:var(--dimmer);font-style:normal}
+
+/* ── команда ── */
+.team{display:grid;grid-template-columns:repeat(auto-fit,minmax(214px,1fr));gap:2px}
+.pers{background:var(--surface);overflow:hidden;display:flex;flex-direction:column;
+  transition:background .3s,box-shadow .3s}
+.pers:hover{background:rgba(242,242,244,.085);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.18),var(--glow-1)}
+.pers .por{position:relative;aspect-ratio:4/5;overflow:hidden}
+.pers .por .im{position:absolute;inset:0;filter:var(--img);
+  transition:transform .7s cubic-bezier(.66,0,.16,1)}
+.pers .por::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.32;
+  mix-blend-mode:overlay;
+  background-image:radial-gradient(rgba(0,0,0,.9) 1px,transparent 1.2px);background-size:4px 4px}
+.pers:hover .por .im{transform:scale(1.04)}
+.pers .bd{padding:18px 18px 22px;display:flex;flex-direction:column;flex:1}
+.pers h3{font-family:"Golos Text",sans-serif;font-weight:500;font-size:16.5px;margin:0;
+  letter-spacing:-.004em}
+.pers .role{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dimmer);
+  margin-top:9px}
+.pers p{font-size:12.5px;line-height:1.6;color:var(--dim);margin:13px 0 0}
+.teamfoot{margin-top:22px;font-size:12.5px;color:var(--dim);line-height:1.7;max-width:62ch}
+.teamfoot b{color:var(--ink);font-weight:500}
+.im.p1{background:radial-gradient(58% 48% at 50% 34%,#8E8E96,#33333A 62%,#101014)}
+.im.p2{background:radial-gradient(56% 46% at 46% 30%,#82828A,#2C2C33 60%,#0E0E12)}
+.im.p3{background:radial-gradient(60% 50% at 54% 36%,#98989F,#3A3A41 64%,#121216)}
+.im.p4{background:radial-gradient(54% 44% at 48% 32%,#7C7C85,#28282F 58%,#0D0D11)}
+
+.status{margin-top:120px;font-size:12px;color:var(--dim);display:flex;gap:18px;
+  flex-wrap:wrap;align-items:center;letter-spacing:.04em}
+.status b{font-family:"Golos Text",sans-serif;font-weight:500;color:var(--ink);font-size:12px;
+  letter-spacing:.1em;text-transform:uppercase;text-shadow:var(--glow-1)}
+.status i{color:var(--dimmer);font-style:normal}
+.status .cell{width:8px;height:8px;background:var(--ink);box-shadow:var(--glow-2);
+  animation:blink 2s steps(1) infinite}
+@keyframes blink{50%{opacity:.18;box-shadow:none}}
+
+/* ═══ ПОДВАЛ — техническая наклейка справа ═══ */
+footer{padding:0 44px 64px;display:flex;justify-content:flex-end}
+.plateseal{width:344px;max-width:100%;background:rgba(242,242,244,.04);
+  box-shadow:inset 0 0 0 1px var(--edge);padding:2px;
+  font-family:Inter,sans-serif;font-variant-numeric:tabular-nums}
+.plateseal .hd{display:flex;justify-content:space-between;align-items:center;
+  padding:9px 12px 8px;font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;
+  color:#08080A;background:var(--ink)}
+.plateseal .rows{padding:4px 0 2px}
+.plateseal .r{display:grid;grid-template-columns:88px 1fr;gap:10px;padding:5px 12px;
+  font-size:9px;letter-spacing:.11em;text-transform:uppercase}
+.plateseal .k{color:var(--dimmer)}
+.plateseal .v{color:var(--dim);word-break:break-word}
+.plateseal .v b{color:var(--ink);font-weight:500}
+.plateseal .bar{margin:7px 12px 10px;height:19px;
+  background:repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 3px,
+    var(--ink) 3px 5px,transparent 5px 6px,var(--ink) 6px 9px,transparent 9px 11px);
+  opacity:.5}
+.plateseal .ft{display:flex;justify-content:space-between;padding:0 12px 10px;
+  font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--dimmer)}
+
+@media(max-width:1100px){.gal{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){
+  .dock{left:12px;right:12px;transform:none;max-width:none;gap:14px;padding:10px 12px}
+  .dock nav{display:none}
+  .burger{display:block}
+  .dock .sp{margin-left:auto;gap:14px}
+  .hero,main,footer{padding-left:20px;padding-right:20px}
+  .wm-wide{display:none}.wm-narrow{display:block}
+  .shead::before{left:-20px;width:12px}
+  .tl::before{left:9px} .tl::after{left:3px}
+  .ph{grid-template-columns:20px 1fr;gap:0 16px}
+  .ph .when{grid-column:2;text-align:left;padding:0 0 8px}
+  .ph .mk{grid-row:1/3;grid-column:1;margin-top:2px}
+  .ph .body{grid-column:2}
+  .day{grid-template-columns:46px 1fr;gap:14px}
+  .day .act{grid-column:1/-1;margin-top:10px}
+  .ed{grid-template-columns:1fr;gap:14px;padding:24px 20px}
+  .ed:hover{padding-left:20px}
+  .gal{grid-auto-rows:150px}
+  footer{justify-content:stretch}
+}
+</style>
+</head>
+<body>
+
+<header class="dock" id="dock">
+  <button class="burger" id="burger" aria-expanded="false" aria-controls="menu" aria-label="Меню">
+    <i></i><i></i><i></i>
+  </button>
+  <nav>
+    <a href="#">Фестиваль</a><a href="#">Лаборатория</a><a href="#">Материалы</a>
+    <a href="#">Архив</a><a href="#">О нас</a>
+  </nav>
+  <div class="sp">
+    <div class="lang" id="lang">
+      <button data-l="ru" aria-pressed="true">Ru</button><s>/</s>
+      <button data-l="en" aria-pressed="false">En</button>
+    </div>
+    <button class="b b--sm"><span>Билеты</span></button>
+  </div>
+</header>
+
+<div class="menu" id="menu">
+  <a href="#">Фестиваль</a><a href="#">Лаборатория</a><a href="#">Материалы</a>
+  <a href="#">Архив</a><a href="#">О нас</a>
+  <div class="mfoot">17.09 — 20.09.2026 / Санкт-Петербург</div>
+</div>
+
+<div class="hero">
+  <div class="plate"></div>
+  <div class="plate-bmp"></div>
+  <canvas id="wave"></canvas>
+  <div class="beamlight"></div>
+  <div class="vig"></div>
+  <div class="hero-in">
+    <svg class="wordmark wm-wide" viewBox="0 0 1200 104" preserveAspectRatio="xMinYMid meet"
+         role="img" aria-label="По-ту-сторонний">
+      <text x="0" y="94" font-size="118" font-weight="600" textLength="1200" lengthAdjust="spacing">ПО-ТУ-СТОРОННИЙ</text>
+    </svg>
+    <svg class="wordmark wm-narrow" viewBox="0 0 600 190" preserveAspectRatio="xMinYMid meet"
+         role="img" aria-label="По-ту-сторонний">
+      <text x="0" y="76" font-size="90" font-weight="600">ПО-ТУ-</text>
+      <text x="0" y="174" font-size="90" font-weight="600" textLength="600" lengthAdjust="spacing">СТОРОННИЙ</text>
+    </svg>
+    <div class="sub"><span>Сезон 03 — «Переход»</span><i>|</i><span>17—20.09.2026</span>
+      <i>|</i><span>Санкт-Петербург</span></div>
+    <div class="lede">Фестиваль-лаборатория, где кино становится инструментом исследования.
+      Третий сезон — о переходе: между состояниями, между носителями, между этой стороной и той.</div>
+    <div class="hero-cta">
+      <button class="b"><span>Билеты</span></button>
+      <button class="b"><span>Лента сезона</span></button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<section>
+  <div class="shead">Лента сезона <a href="#">Весь архив →</a></div>
+  <div class="tl">
+    <div class="ph done">
+      <div class="when">Май — Июль</div><div class="mk"></div>
+      <div class="body"><div class="state">Завершено</div><h3 class="g">Подготовка</h3>
+        <p>Сбор кураторской команды, определение векторов сезона, переговоры с площадками.</p></div>
+    </div>
+
+    <div class="ph now">
+      <div class="when">до 15 августа</div><div class="mk"></div>
+      <div class="body"><div class="state">Идёт приём</div><h3 class="g">Опен колл</h3>
+        <p>Принимаем экспериментальные работы любой длины и любого носителя. Тема сезона —
+          переход; трактовка свободная.</p>
+        <div class="act"><button class="b b--sm"><span>Подать работу</span></button>
+          <button class="b b--sm"><span>Требования</span></button></div></div>
+    </div>
+
+    <div class="ph now">
+      <div class="when">Июль — Сентябрь</div><div class="mk"></div>
+      <div class="body"><div class="state">Набор идёт</div>
+        <h3 class="g">Лаборатория лиминального образа</h3>
+        <p>Два месяца чтения, показов и разбора. Начинается онлайн-ридингом, заканчивается
+          исследовательскими и художественными проектами участников — их покажут на фестивале.</p>
+        <div class="act"><button class="b b--sm"><span>Участвовать</span></button></div></div>
+    </div>
+
+    <div class="ph next">
+      <div class="when">17 — 20 сентября</div><div class="mk"></div>
+      <div class="body"><div class="state">Через 45 дней</div><h3 class="g">Фестиваль</h3>
+        <p>Четыре дня, три площадки: кураторские программы, специальные показы, разговоры
+          и проекты лаборатории.</p>
+        <div class="days">
+          <div class="day hi"><div class="n g">17</div>
+            <div><div class="t">Открытие / Нож в сердце Европы</div>
+              <div class="m">Горка <i>|</i> 19:00 <i>|</i> 82 мин <i>|</i> 16 мм</div></div>
+            <div class="act"><button class="b b--sm"><span>Билет</span></button></div></div>
+          <div class="day"><div class="n g">18</div>
+            <div><div class="t">Кураторская программа «По ту сторону»</div>
+              <div class="m">Горка <i>|</i> 17:00 <i>|</i> 94 мин</div></div>
+            <div class="act"><button class="b b--sm"><span>Билет</span></button></div></div>
+          <div class="day"><div class="n g">19</div>
+            <div><div class="t">Лаборатория / показ проектов участников</div>
+              <div class="m">Дом Радио <i>|</i> 14:00 <i>|</i> 120 мин</div></div>
+            <div class="act"><button class="b b--sm"><span>Билет</span></button></div></div>
+          <div class="day"><div class="n g">20</div>
+            <div><div class="t">Закрытие / Линия отражения</div>
+              <div class="m">Горка <i>|</i> 19:00 <i>|</i> 68 мин</div></div>
+            <div class="act"><button class="b b--sm"><span>Билет</span></button></div></div>
+        </div>
+        <div class="act"><button class="b b--sm"><span>Полное расписание</span></button></div>
+      </div>
+    </div>
+
+    <div class="ph">
+      <div class="when">Октябрь</div><div class="mk"></div>
+      <div class="body"><div class="state">Впереди</div><h3 class="g">Эхо в других городах</h3>
+        <p>Избранные программы едут в Москву, Выборг и Калининград.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="shead">Материалы <a href="#">Все тексты →</a></div>
+  <div class="mat">
+    <article class="mc"><div class="cov"><div class="im b"></div></div>
+      <div class="bd"><div class="kind">Интервью</div>
+        <h3 class="g">«Плёнка помнит дольше, чем мы» — разговор с Анной Цирлиной</h3>
+        <div class="when">28.07.2026 <i>|</i> 12 мин</div></div></article>
+    <article class="mc"><div class="cov"><div class="im c"></div></div>
+      <div class="bd"><div class="kind">Текст</div>
+        <h3 class="g">Хонтология и кинематограф: что остаётся, когда изображение уходит</h3>
+        <div class="when">14.07.2026 <i>|</i> 18 мин</div></div></article>
+    <article class="mc"><div class="cov"><div class="im e"></div></div>
+      <div class="bd"><div class="kind">Шоукейс</div>
+        <h3 class="g">Пять работ, с которых начинается сезон «Переход»</h3>
+        <div class="when">02.07.2026 <i>|</i> 7 мин</div></div></article>
+    <article class="mc"><div class="cov"><div class="im d"></div></div>
+      <div class="bd"><div class="kind">Хроника</div>
+        <h3 class="g">Самиздат «К!»: как собирается номер о лиминальном образе</h3>
+        <div class="when">19.06.2026 <i>|</i> 9 мин</div></div></article>
+  </div>
+</section>
+
+<section>
+  <div class="shead">Архив <a href="#">Все сезоны →</a></div>
+  <div class="past">
+    <article class="ed"><div class="y g">2025</div>
+      <div><h3 class="g">Otherworldly 2.0</h3>
+        <div class="vec">Нейрометаморфозы <i>/</i> граница <i>/</i> след <i>/</i> чувственность</div>
+        <p>Три дня в Санкт-Петербурге, эхо в Москве, Выборге и Калининграде.</p>
+        <div class="fig"><span>24 фильма</span><i>|</i><span>9 программ</span><i>|</i><span>4 города</span></div></div>
+      <div class="act"><button class="b b--sm"><span>Открыть</span></button></div></article>
+    <article class="ed"><div class="y g">2024</div>
+      <div><h3 class="g">Otherworldly 1.0</h3>
+        <div class="vec">Призрачность образа <i>/</i> хонтология <i>/</i> потустороннее</div>
+        <p>Первый сезон в мастерской «Горка», эхо в Москве и Калининграде.</p>
+        <div class="fig"><span>17 фильмов</span><i>|</i><span>6 программ</span><i>|</i><span>3 города</span></div></div>
+      <div class="act"><button class="b b--sm"><span>Открыть</span></button></div></article>
+  </div>
+</section>
+
+<section>
+  <div class="shead">Съёмка <a href="#">Вся галерея →</a></div>
+  <div class="gal">
+    <figure class="shot big"><div class="im a"></div>
+      <figcaption>Горка / открытие 2.0 / 12.09.25</figcaption></figure>
+    <figure class="shot"><div class="im b"></div><figcaption>Проекция 16 мм</figcaption></figure>
+    <figure class="shot"><div class="im c"></div><figcaption>Разговор после показа</figcaption></figure>
+    <figure class="shot wide"><div class="im e"></div><figcaption>Эхо / Калининград</figcaption></figure>
+    <figure class="shot"><div class="im d"></div><figcaption>Лаборатория / ридинг</figcaption></figure>
+    <figure class="shot"><div class="im c"></div><figcaption>Зал перед началом</figcaption></figure>
+    <figure class="shot wide"><div class="im a"></div><figcaption>Стена афиш 2.0</figcaption></figure>
+  </div>
+  <div class="galfoot"><span>2024 — 2025</span><i>|</i><span>184 кадра</span>
+    <i>|</i><span>съёмка: Даша Чернова</span></div>
+</section>
+
+<section>
+  <div class="shead">Команда <a href="#">О фестивале →</a></div>
+  <div class="team">
+    <article class="pers"><div class="por"><div class="im p1"></div></div>
+      <div class="bd"><h3 class="g">Ира Ломакина</h3>
+        <div class="role">Кураторка / программа</div>
+        <p>Собирает кураторские программы и отвечает за отбор. Соосновательница
+          киносамиздата «К!».</p></div></article>
+    <article class="pers"><div class="por"><div class="im p2"></div></div>
+      <div class="bd"><h3 class="g">Полина Трубицына</h3>
+        <div class="role">Кураторка / лаборатория</div>
+        <p>Ведёт Лабораторию лиминального образа: ридинг, разборы, проекты участников.
+          Соосновательница «К!».</p></div></article>
+    <article class="pers"><div class="por"><div class="im p3"></div></div>
+      <div class="bd"><h3 class="g">Даша Чернова</h3>
+        <div class="role">Кураторка / съёмка</div>
+        <p>Снимает фестиваль и собирает архив. Отвечает за визуальный язык сезона.
+          Соосновательница «К!».</p></div></article>
+    <article class="pers"><div class="por"><div class="im p4"></div></div>
+      <div class="bd"><h3 class="g">Елиза Тимофеева</h3>
+        <div class="role">Кураторка / тексты</div>
+        <p>Редактирует материалы фестиваля и ведёт разговоры с режиссёрами.</p></div></article>
+  </div>
+  <div class="teamfoot">Фестиваль делают четыре кураторки. Три из них —
+    <b>Ира</b>, <b>Полина</b> и <b>Даша</b> — также соосновательницы киносамиздата
+    <b>«К!»</b>. Пишите на <b>otherworldlyfilmfestival@gmail.com</b> или в телеграм
+    <b>@potustoronnii</b>.</div>
+</section>
+
+<div class="status">
+  <span class="cell"></span><b>До фестиваля 45 дней</b>
+  <i>|</i><span>Опен колл открыт до 15.08</span>
+  <i>|</i><span>Лаборатория — набор идёт</span>
+  <span style="margin-left:auto">Проектор включится 17.09</span>
+</div>
+
+</main>
+
+<footer>
+  <div class="plateseal">
+    <div class="hd"><span>Otherworldly</span><span>Спб / Ru</span></div>
+    <div class="rows">
+      <div class="r"><span class="k">Событие</span><span class="v"><b>По-ту-сторонний 3.0</b></span></div>
+      <div class="r"><span class="k">Сезон</span><span class="v">03 / «Переход»</span></div>
+      <div class="r"><span class="k">Даты</span><span class="v"><b>17.09 — 20.09.2026</b></span></div>
+      <div class="r"><span class="k">Площадки</span><span class="v">Горка / Дом Радио</span></div>
+      <div class="r"><span class="k">Почта</span><span class="v">otherworldlyfilmfestival@gmail.com</span></div>
+      <div class="r"><span class="k">Телеграм</span><span class="v">@potustoronnii</span></div>
+      <div class="r"><span class="k">Инстаграм</span><span class="v">@otherworldly_festival</span></div>
+      <div class="r"><span class="k">Билеты</span><span class="v">Timepad</span></div>
+    </div>
+    <div class="bar"></div>
+    <div class="ft"><span>Изд. 03 / Ред. 08</span><span>© 2026</span></div>
+  </div>
+</footer>
+
+<script>
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const dock=document.getElementById('dock'), burger=document.getElementById('burger'),
+      menu=document.getElementById('menu');
+
+/* язык */
+document.querySelectorAll('#lang button').forEach(b=>b.onclick=()=>
+  document.querySelectorAll('#lang button').forEach(x=>
+    x.setAttribute('aria-pressed',String(x===b))));
+
+/* бургер */
+function setMenu(on){
+  burger.setAttribute('aria-expanded',String(on));
+  menu.classList.toggle('on',on);
+  document.body.style.overflow = on ? 'hidden' : '';
+}
+burger.onclick=()=>setMenu(burger.getAttribute('aria-expanded')!=='true');
+menu.querySelectorAll('a').forEach(a=>a.onclick=()=>setMenu(false));
+addEventListener('keydown',e=>{ if(e.key==='Escape') setMenu(false); });
+
+/* док прячется при движении вниз */
+let last=0;
+addEventListener('scroll',()=>{
+  const y=scrollY;
+  if(menu.classList.contains('on')) return;
+  dock.classList.toggle('away', y>160 && y>last);
+  last=y;
+},{passive:true});
+
+/* ─── точечная волна — только первый экран ─── */
+(function(){
+  const cv=document.getElementById('wave'), ctx=cv.getContext('2d'), hero=cv.parentElement;
+  let W=0,H=0,dpr=1,pts=[],raf=null,t=0,visible=true;
+  const GAP=26, R=1.5;
+  function build(){
+    dpr=Math.min(devicePixelRatio||1,2);
+    W=hero.clientWidth; H=hero.clientHeight;
+    cv.width=W*dpr; cv.height=H*dpr; cv.style.width=W+'px'; cv.style.height=H+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    pts=[]; const cx=W/2, cy=H*0.10;
+    for(let y=GAP/2;y<H;y+=GAP) for(let x=GAP/2;x<W;x+=GAP)
+      pts.push({x,y,d:Math.hypot(x-cx,y-cy)});
+  }
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    const far=Math.max(W,H)*1.15;
+    for(const p of pts){
+      const w=Math.sin(p.d*0.016-t)*0.5+0.5;
+      const a=w*w*.55*(1-Math.min(p.d/far,1));
+      if(a<0.012) continue;
+      ctx.beginPath(); ctx.arc(p.x,p.y,R*(0.55+w*0.9),0,6.283);
+      ctx.fillStyle='rgba(255,255,255,'+a.toFixed(3)+')'; ctx.fill();
+    }
+    t+=0.028; raf=requestAnimationFrame(frame);
+  }
+  const start=()=>{ if(!raf&&visible&&!reduced) raf=requestAnimationFrame(frame); };
+  const stop =()=>{ if(raf){cancelAnimationFrame(raf); raf=null;} };
+  build();
+  if(reduced){ t=1.2; frame(); stop(); } else start();
+  addEventListener('resize',build,{passive:true});
+  new IntersectionObserver(e=>{ visible=e[0].isIntersecting; visible?start():stop(); },
+    {threshold:0}).observe(hero);
+  document.addEventListener('visibilitychange',()=>document.hidden?stop():start());
+})();
+</script>
+</body>
+</html>

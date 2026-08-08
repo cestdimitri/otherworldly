@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Расписание — По-ту-сторонний</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════ РАСПИСАНИЕ ═══════
+   Самый тяжёлый макет проекта. Сетка пропорциональна времени: строка = 30 минут,
+   событие занимает столько строк, сколько идёт. Хронометраж виден как высота.
+   Полосы обозначены ТОЛЬКО подписью. Цвет, толщина линейки и знак на корешке
+   были испробованы и убраны: подпись всё это время делала всю работу одна. */
+
+:root{
+  --bg:#08080A; --surface:rgba(242,242,244,.045); --ink:#F2F2F4;
+  --dim:#9A9AA2; --dimmer:#6E6E77; --edge:rgba(242,242,244,.16);
+  --glow-1:0 0 18px rgba(242,242,244,.10);
+  --glow-2:0 0 42px rgba(242,242,244,.20);
+  --slot:27px;   /* высота получаса */
+  --h-ctl:40px; --h-ctl-sm:34px;   /* канон высот из 11-specimen */
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;color:var(--ink);font-family:Inter,-apple-system,sans-serif;line-height:1.5;
+  -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;
+  text-shadow:0 0 1px rgba(242,242,244,.22);
+  background:radial-gradient(140% 78% at 50% -8%,#1A1A22 0%,#101015 26%,#0A0A0D 58%,#08080A 100%),#08080A;
+  background-attachment:fixed}
+.g{font-family:"Golos Text",Inter,sans-serif;text-shadow:0 0 2px rgba(242,242,244,.20)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.b{position:relative;display:inline-flex;align-items:center;justify-content:center;
+  height:var(--h-ctl);padding:0 20px;border:0;cursor:pointer;
+  font-family:Inter,sans-serif;font-weight:600;font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;white-space:nowrap;color:var(--ink);text-decoration:none;
+  background:rgba(242,242,244,.028);box-shadow:inset 0 0 0 1px var(--edge);
+  transition:background .34s ease,box-shadow .34s ease}
+.b>*{position:relative;z-index:1}
+.b::after{content:"";position:absolute;left:50%;top:50%;width:130%;height:230%;z-index:0;
+  transform:translate(-50%,-50%) scale(.55);opacity:0;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(242,242,244,.42),transparent 72%);
+  filter:blur(16px);transition:opacity .42s ease,transform .42s ease}
+.b:hover{background:rgba(242,242,244,.10);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.5),var(--glow-2)}
+.b:hover::after{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.b--on,.b[aria-pressed="true"]{background:rgba(242,242,244,.07);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.22)}
+.b--sm{height:var(--h-ctl-sm);padding:0 15px;font-size:10px;letter-spacing:.13em}
+
+.wrap{max-width:1320px;margin:0 auto;padding:44px 40px 110px}
+.pagenav{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase}
+.pagenav a{color:var(--dimmer);text-decoration:none;transition:.24s}
+.pagenav a:hover{color:var(--ink);text-shadow:var(--glow-1)}
+.pagenav a[aria-current]{color:var(--ink)}
+h1{font-family:"Golos Text",sans-serif;font-weight:600;font-size:clamp(30px,5vw,54px);
+  letter-spacing:-.015em;text-transform:uppercase;margin:22px 0 0;line-height:1.06}
+.meta{font-size:12.5px;color:var(--dim);margin-top:12px;letter-spacing:.03em}
+.meta i{color:var(--dimmer);font-style:normal;padding:0 8px}
+
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin:34px 0 10px;align-items:center}
+.controls .sep{width:1px;height:22px;background:var(--edge);margin:0 6px}
+.controls .lbl{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dimmer);
+  margin-right:2px}
+.daytabs{display:none;gap:8px;margin:26px 0 4px;flex-wrap:wrap}
+
+/* ═══ СЕТКА ═══ */
+.grid{display:grid;grid-template-columns:66px repeat(4,1fr);gap:2px;margin-top:26px;
+  position:relative}
+.hd{position:sticky;top:0;z-index:5;padding:12px 10px 12px;
+  background:rgba(10,10,14,.86);backdrop-filter:blur(14px);
+  font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dimmer)}
+.hd b{display:block;font-family:"Golos Text",sans-serif;font-weight:600;font-size:26px;
+  letter-spacing:-.02em;color:var(--ink);margin-top:3px}
+.hd.corner{background:transparent;backdrop-filter:none}
+
+/* часовые полосы вместо линеек: чередующаяся подсветка, не разделители */
+.band{grid-column:2/-1;background:rgba(242,242,244,.022);pointer-events:none;z-index:0}
+.tm{grid-column:1;font-size:10px;color:var(--dimmer);text-align:right;padding:2px 10px 0 0;
+  letter-spacing:.06em;z-index:1}
+
+/* ═══ СОБЫТИЕ ═══ */
+.ev{position:relative;z-index:2;padding:9px 11px;overflow:hidden;
+  background:var(--surface);
+  transition:background .26s,box-shadow .26s,transform .26s}
+.ev:hover{background:rgba(242,242,244,.11);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.2),var(--glow-1);cursor:pointer}
+.ev .t{font-family:"Golos Text",sans-serif;font-weight:500;font-size:13px;line-height:1.26;
+  letter-spacing:-.004em}
+.ev .v{font-size:10.5px;color:var(--dim);margin-top:5px}
+.ev .v i{color:var(--dimmer);font-style:normal;padding:0 5px}
+/* Подпись полосы — единственный носитель категории. Стоит перед названием,
+   как .kind в карточках материалов и .state в фазах сезона. */
+.ev .s{font-size:9px;letter-spacing:.17em;text-transform:uppercase;color:var(--dimmer);
+  margin-bottom:5px}
+.ev.hi{background:rgba(242,242,244,.13);box-shadow:inset 0 0 0 1px rgba(242,242,244,.28),var(--glow-1)}
+
+/* линия «сейчас» — свечение помечает живое */
+.now{position:absolute;z-index:6;height:1px;background:var(--ink);box-shadow:var(--glow-2);
+  pointer-events:none}
+.now::after{content:"сейчас";position:absolute;left:0;top:-16px;font-size:8.5px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--ink);text-shadow:var(--glow-1)}
+
+/* ═══ МОБИЛЬНЫЙ СПИСОК ═══ */
+.list{display:none;margin-top:22px}
+.list .dayhd{position:sticky;top:0;z-index:4;padding:14px 0 10px;
+  background:linear-gradient(180deg,#0A0A0D 60%,transparent);
+  font-family:"Golos Text",sans-serif;font-weight:600;font-size:20px;text-transform:uppercase;
+  letter-spacing:-.01em}
+.list .row{display:grid;grid-template-columns:52px 1fr;gap:14px;padding:14px 14px;
+  position:relative;background:rgba(242,242,244,.045);margin-bottom:1px}
+.list .row .h{font-size:12px;color:var(--dim);padding-top:2px}
+.list .row .t{font-family:"Golos Text",sans-serif;font-weight:500;font-size:15px;line-height:1.3}
+.list .row .v{font-size:11px;color:var(--dim);margin-top:5px}
+.list .row .v i{color:var(--dimmer);font-style:normal;padding:0 6px}
+.list .row .s{font-size:9px;letter-spacing:.17em;text-transform:uppercase;color:var(--dimmer);
+  margin-bottom:5px}
+
+.note{margin-top:30px;font-size:12px;color:var(--dimmer);max-width:74ch;line-height:1.7}
+.note b{color:var(--dim);font-weight:500}
+
+@media(max-width:920px){
+  .wrap{padding:32px 20px 90px}
+  .grid{display:none}
+  .list{display:block}
+  .daytabs{display:flex}
+}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+
+  <nav class="pagenav">
+    <a href="../12-homepage/index.html">← Главная</a>
+    <a href="timetable.html" aria-current="page">Расписание</a>
+    <a href="programme.html">Программа</a>
+    <a href="film.html">Фильм</a>
+    <a href="article.html">Материал</a>
+    <a href="edition.html">Архив</a>
+  </nav>
+  <h1 class="g">Расписание</h1>
+  <div class="meta">Сезон 03 «Переход» <i>|</i> 17—20 сентября 2026 <i>|</i> 12 событий
+    <i>|</i> Горка, Дом Радио</div>
+
+  <div class="controls">
+    <span class="lbl">Полосы</span>
+    <button class="b" data-f="all" aria-pressed="true"><span>Все</span></button>
+    <button class="b" data-f="fest" aria-pressed="false"><span>Фестиваль</span></button>
+    <button class="b" data-f="lab" aria-pressed="false"><span>Лаборатория</span></button>
+    <button class="b" data-f="spec" aria-pressed="false"><span>Спецпрограмма</span></button>
+    <button class="b" data-f="echo" aria-pressed="false"><span>Эхо</span></button>
+    <span class="sep"></span>
+    <button class="b" id="ics"><span>Скачать .ics</span></button>
+  </div>
+
+  <div class="daytabs" id="daytabs">
+    <button class="b" data-d="0" aria-pressed="true"><span>Чт 17</span></button>
+    <button class="b" data-d="1" aria-pressed="false"><span>Пт 18</span></button>
+    <button class="b" data-d="2" aria-pressed="false"><span>Сб 19</span></button>
+    <button class="b" data-d="3" aria-pressed="false"><span>Вс 20</span></button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <div class="list" id="list"></div>
+
+
+  <div class="note">
+    <b>Сетка пропорциональна времени.</b> Строка — тридцать минут, событие занимает столько
+    строк, сколько идёт: хронометраж читается как высота, а накладки видны сразу.
+    <b>Полоса обозначена подписью — и только ею.</b> Цвет, толщина линейки и знак на корешке
+    были испробованы по очереди и убраны: слово называет категорию точно, не требует легенды
+    и работает в чёрно-белой печати, при любом дальтонизме и с выключенными стилями.
+    <b>Ниже 920px</b> сетка уступает списку по дням:
+    четыре колонки на телефоне нечитаемы, а вертикальный список с липкой шапкой дня — да.
+  </div>
+
+</div>
+
+<script>
+/* Данные — форма будущего запроса к Sanity: event с датой, длительностью и полосой. */
+const DAYS=['Чт 17','Пт 18','Сб 19','Вс 20'];
+const START=12*60;            // сетка с 12:00
+const END=23*60+30;
+const EV=[
+ {d:0,t:'19:00',dur:82,s:'fest',n:'Открытие / Нож в сердце Европы',v:'Горка',f:'16 мм',hi:1},
+ {d:0,t:'21:30',dur:64,s:'spec',n:'Разговор с режиссёром',v:'Горка',f:''},
+ {d:1,t:'14:00',dur:120,s:'lab', n:'Ридинг-группа / лиминальный образ',v:'Дом Радио',f:''},
+ {d:1,t:'17:00',dur:94,s:'fest',n:'Кураторская программа «По ту сторону»',v:'Горка',f:''},
+ {d:1,t:'20:00',dur:110,s:'fest',n:'Линия отражения',v:'Горка',f:'16 мм'},
+ {d:2,t:'12:30',dur:180,s:'spec',n:'Мастерская 16 мм',v:'Горка',f:'по записи'},
+ {d:2,t:'16:00',dur:120,s:'lab', n:'Показ проектов участников',v:'Дом Радио',f:''},
+ {d:2,t:'19:00',dur:68,s:'fest',n:'Вокруг да около',v:'Горка',f:''},
+ {d:2,t:'21:00',dur:76,s:'echo',n:'Эхо / Калининград',v:'онлайн',f:''},
+ {d:3,t:'14:00',dur:76,s:'echo',n:'Эхо / Москва',v:'Центр',f:''},
+ {d:3,t:'17:00',dur:94,s:'fest',n:'Специальная программа',v:'Горка',f:''},
+ {d:3,t:'19:30',dur:110,s:'fest',n:'Закрытие / Нейрометаморфозы',v:'Горка',f:'16 мм'},
+];
+const NAME={fest:'Фестиваль',lab:'Лаборатория',spec:'Спецпрограмма',echo:'Эхо'};
+/* Живое состояние. На бою вычисляется из текущего времени и дат edition;
+   вне фестиваля равно null и линия не рисуется. Здесь — для демонстрации. */
+const NOW={d:0,t:'19:20'};
+const mins=t=>{const[a,b]=t.split(':').map(Number);return a*60+b};
+const slot=m=>Math.round((m-START)/30)+2;          // +2: строка 1 — шапка
+const SLOTS=Math.round((END-START)/30);
+
+let filter='all', day=0;
+
+function grid(){
+  const g=document.getElementById('grid');
+  let h='<div class="hd corner"></div>';
+  DAYS.forEach(d=>{const[a,b]=d.split(' ');
+    h+=`<div class="hd">${a}<b>${b}</b></div>`});
+  // часовые полосы + метки времени
+  for(let i=0;i<SLOTS;i++){
+    const m=START+i*30, r=i+2;
+    if(m%60===0){
+      h+=`<div class="tm" style="grid-row:${r}">${String(m/60|0).padStart(2,'0')}:00</div>`;
+      h+=`<div class="band" style="grid-row:${r}/span 2"></div>`;
+    }
+  }
+  EV.forEach(e=>{
+    if(filter!=='all'&&e.s!==filter) return;
+    const r=slot(mins(e.t)), span=Math.max(2,Math.round(e.dur/30));
+    h+=`<div class="ev ${e.s}${e.hi?' hi':''}" style="grid-column:${e.d+2};grid-row:${r}/span ${span}">
+      <div class="s">${NAME[e.s]}</div>
+      <div class="t">${e.n}</div>
+      <div class="v">${e.t}<i>|</i>${e.v}${e.f?'<i>|</i>'+e.f:''}<i>|</i>${e.dur} мин</div></div>`;
+  });
+  /* Линия «сейчас». Рисуется только когда идёт фестиваль: NOW=null — её нет.
+     Здесь выставлена демонстрационно на 17.09, 19:20. Смещение внутри
+     получасового слота считается пропорцией, а не подбирается на глаз. */
+  if(NOW){
+    const m=mins(NOW.t), r=slot(m - (m-START)%30), off=((m-START)%30/30)*27;
+    h+=`<div class="now" style="grid-column:${NOW.d+2}/-1;grid-row:${r};
+         transform:translateY(${off.toFixed(1)}px)"></div>`;
+  }
+  g.innerHTML=h;
+  g.style.gridTemplateRows=`auto repeat(${SLOTS},var(--slot))`;
+}
+
+function list(){
+  const l=document.getElementById('list');
+  const rows=EV.filter(e=>e.d===day&&(filter==='all'||e.s===filter))
+               .sort((a,b)=>mins(a.t)-mins(b.t));
+  l.innerHTML=`<div class="dayhd g">${DAYS[day]} сентября</div>` + (rows.length?rows.map(e=>
+    `<div class="row ${e.s}">
+       <div class="h">${e.t}</div>
+       <div><div class="s">${NAME[e.s]}</div>
+         <div class="t">${e.n}</div>
+         <div class="v">${e.v}${e.f?'<i>|</i>'+e.f:''}<i>|</i>${e.dur} мин</div></div>
+     </div>`).join('') : '<div class="v" style="color:var(--dimmer);padding:18px 0">В этот день по выбранной полосе показов нет.</div>');
+}
+
+function render(){
+  grid(); list();
+  document.querySelectorAll('[data-f]').forEach(b=>
+    b.setAttribute('aria-pressed',String(b.dataset.f===filter)));
+  document.querySelectorAll('[data-d]').forEach(b=>
+    b.setAttribute('aria-pressed',String(+b.dataset.d===day)));
+  // состояние в URL — отфильтрованный вид можно переслать
+  const p=new URLSearchParams();
+  if(filter!=='all') p.set('strand',filter);
+  if(day) p.set('day',String(day));
+  history.replaceState(null,'',p.toString()?'?'+p:location.pathname);
+}
+
+const q=new URLSearchParams(location.search);
+if(q.get('strand')&&NAME[q.get('strand')]) filter=q.get('strand');
+if(q.get('day')) day=Math.min(3,Math.max(0,+q.get('day')||0));
+
+document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{filter=b.dataset.f;render()});
+document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{day=+b.dataset.d;render()});
+document.getElementById('ics').onclick=()=>{
+  const pad=n=>String(n).padStart(2,'0');
+  const dt=(d,t,add=0)=>{const m=mins(t)+add;
+    return `202609${pad(17+d)}T${pad(m/60|0)}${pad(m%60)}00`};
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//po-tu-storonnii//3.0//RU',
+    ...EV.flatMap(e=>['BEGIN:VEVENT',`SUMMARY:${e.n}`,`LOCATION:${e.v}`,
+      `DTSTART;TZID=Europe/Moscow:${dt(e.d,e.t)}`,
+      `DTEND;TZID=Europe/Moscow:${dt(e.d,e.t,e.dur)}`,'END:VEVENT']),
+    'END:VCALENDAR'].join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));
+  a.download='po-tu-storonnii-2026.ics'; a.click(); URL.revokeObjectURL(a.href);
+};
+render();
+</script>
+</body>
+</html>

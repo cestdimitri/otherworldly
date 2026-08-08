@@ -1,0 +1,37 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "otherworldly",
+  // Дата совместимости должна быть 2024-09-23 или позже, иначе Next.js
+  // не заведётся в воркере.
+  "compatibility_date": "2025-03-01",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "global_fetch_strictly_public"
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "otherworldly"
+    }
+  ],
+  // Оптимизация изображений средствами Cloudflare. Кадры и так приходят
+  // с CDN Sanity уже обрезанными, но локальные ассеты пройдут через это.
+  "images": {
+    "binding": "IMAGES"
+  },
+  "observability": {
+    "enabled": true
+  }
+
+  // Кэш ISR можно перенести в R2 — тогда пересборка страницы переживает
+  // перезапуск воркера. Для показа заказчику это лишний шаг настройки,
+  // поэтому включается позже: раздел «Что дальше» в DEPLOY.md.
+  // "r2_buckets": [
+  //   { "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "otherworldly-cache" }
+  // ]
+}

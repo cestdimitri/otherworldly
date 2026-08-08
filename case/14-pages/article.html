@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Плёнка помнит дольше, чем мы — По-ту-сторонний</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════ МАТЕРИАЛ ═══════
+   Единственная страница проекта, где текст — не подпись к чему-то, а сам предмет.
+   Отсюда всё остальное: узкая мера, крупный кегль, выключка по формату,
+   индикатор прочитанного. Реф. 1 (читалка): текст как объект, а не как контент. */
+
+:root{
+  --bg:#08080A; --surface:rgba(242,242,244,.045); --ink:#F2F2F4;
+  --dim:#9A9AA2; --dimmer:#6E6E77; --edge:rgba(242,242,244,.16);
+  --glow-1:0 0 18px rgba(242,242,244,.10);
+  --glow-2:0 0 42px rgba(242,242,244,.20);
+  --img:grayscale(1) contrast(1.3) brightness(.62);
+  --h-ctl:40px; --h-ctl-sm:34px;   /* канон высот из 11-specimen */
+}
+*{box-sizing:border-box}
+html{background:var(--bg);scroll-behavior:smooth}
+body{margin:0;color:var(--ink);font-family:Inter,-apple-system,sans-serif;line-height:1.5;
+  -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;
+  text-shadow:0 0 1px rgba(242,242,244,.22);
+  background:radial-gradient(140% 78% at 50% -8%,#1A1A22 0%,#101015 26%,#0A0A0D 58%,#08080A 100%),#08080A;
+  background-attachment:fixed}
+.g{font-family:"Golos Text",Inter,sans-serif;text-shadow:0 0 2px rgba(242,242,244,.20)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+
+.b{position:relative;display:inline-flex;align-items:center;justify-content:center;
+  height:var(--h-ctl);padding:0 20px;border:0;cursor:pointer;
+  font-family:Inter,sans-serif;font-weight:600;font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;white-space:nowrap;color:var(--ink);text-decoration:none;
+  background:rgba(242,242,244,.028);box-shadow:inset 0 0 0 1px var(--edge);
+  transition:background .34s ease,box-shadow .34s ease}
+.b>*{position:relative;z-index:1}
+.b::after{content:"";position:absolute;left:50%;top:50%;width:130%;height:230%;z-index:0;
+  transform:translate(-50%,-50%) scale(.55);opacity:0;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(242,242,244,.42),transparent 72%);
+  filter:blur(16px);transition:opacity .42s ease,transform .42s ease}
+.b:hover{background:rgba(242,242,244,.10);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.5),var(--glow-2)}
+.b:hover::after{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.b--on,.b[aria-pressed="true"]{background:rgba(242,242,244,.07);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.22)}
+.b--sm{height:var(--h-ctl-sm);padding:0 15px;font-size:10px;letter-spacing:.13em}
+
+/* индикатор прочитанного — тонкая полоса света по верхней кромке */
+.prog{position:fixed;left:0;top:0;height:2px;width:0;z-index:80;background:var(--ink);
+  box-shadow:var(--glow-2);transition:width .1s linear}
+
+.wrap{max-width:1180px;margin:0 auto;padding:44px 40px 120px}
+.pagenav{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase}
+.pagenav a{color:var(--dimmer);text-decoration:none;transition:.24s}
+.pagenav a:hover{color:var(--ink);text-shadow:var(--glow-1)}
+.pagenav a[aria-current]{color:var(--ink)}
+
+/* ═══ ШАПКА МАТЕРИАЛА ═══ */
+.kind{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--dimmer);
+  margin-top:34px}
+h1{font-family:"Golos Text",sans-serif;font-weight:600;font-size:clamp(28px,4.4vw,50px);
+  letter-spacing:-.018em;margin:14px 0 0;line-height:1.14;max-width:19ch}
+.dek{font-size:16px;line-height:1.6;color:var(--dim);margin-top:18px;max-width:56ch}
+.byline{display:flex;gap:0;flex-wrap:wrap;align-items:baseline;margin-top:22px;
+  font-size:12px;color:var(--dim)}
+.byline i{color:var(--dimmer);font-style:normal;padding:0 9px}
+.byline b{font-weight:500;color:var(--ink)}
+
+.cover{position:relative;aspect-ratio:21/9;overflow:hidden;margin-top:34px;
+  background:var(--surface)}
+.cover .im{position:absolute;inset:0;filter:var(--img);
+  background:radial-gradient(84% 70% at 38% 26%,#90909A,#2E2E35 56%,#0C0C10)}
+.cover::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.32;
+  mix-blend-mode:overlay;
+  background-image:radial-gradient(rgba(0,0,0,.92) 1.1px,transparent 1.3px);background-size:4px 4px}
+.cap{font-size:11px;color:var(--dimmer);margin-top:10px;letter-spacing:.03em}
+
+/* ═══ ТЕЛО ═══ */
+.body{display:grid;grid-template-columns:1fr 216px;gap:60px;margin-top:52px;align-items:start}
+article{max-width:64ch}
+article p{font-size:16.5px;line-height:1.76;color:var(--dim);margin:0 0 22px;
+  text-align:justify;hyphens:auto}
+article p.lead{font-size:19px;line-height:1.62;color:var(--ink);text-align:left}
+article h2{font-family:"Golos Text",sans-serif;font-weight:500;font-size:22px;
+  letter-spacing:-.008em;color:var(--ink);margin:44px 0 16px;line-height:1.3}
+article blockquote{margin:34px 0;padding:0 0 0 22px;box-shadow:inset 2px 0 0 var(--edge)}
+article blockquote p{font-family:"Golos Text",sans-serif;font-size:19px;line-height:1.52;
+  color:var(--ink);text-align:left;margin:0}
+article blockquote cite{display:block;font-family:Inter,sans-serif;font-style:normal;
+  font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--dimmer);
+  margin-top:14px}
+article figure{margin:38px 0}
+article figure .fr{position:relative;aspect-ratio:3/2;overflow:hidden;background:var(--surface)}
+article figure .im{position:absolute;inset:0;filter:var(--img);
+  background:linear-gradient(146deg,#74747C,#1C1C21 60%,#0B0B0E)}
+article figure .fr::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.3;
+  mix-blend-mode:overlay;
+  background-image:radial-gradient(rgba(0,0,0,.9) 1px,transparent 1.2px);background-size:4px 4px}
+article figcaption{font-size:11px;color:var(--dimmer);margin-top:9px;letter-spacing:.03em}
+article a{color:var(--ink);text-decoration:none;box-shadow:inset 0 -1px 0 var(--edge);
+  transition:.24s}
+article a:hover{box-shadow:inset 0 -1px 0 var(--ink);text-shadow:var(--glow-1)}
+
+/* боковая колонка липнет: оглавление и кнопка билета всегда под рукой */
+.side{position:sticky;top:34px;display:flex;flex-direction:column;gap:26px}
+.toc div{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--dimmer);
+  margin-bottom:12px}
+.toc a{display:block;font-size:12.5px;color:var(--dim);text-decoration:none;padding:6px 0;
+  transition:.24s;line-height:1.4}
+.toc a:hover{color:var(--ink);text-shadow:var(--glow-1)}
+.side .rel{font-size:12px;color:var(--dim);line-height:1.6}
+.side .rel b{display:block;font-family:"Golos Text",sans-serif;font-weight:500;font-size:13.5px;
+  color:var(--ink);margin-bottom:6px}
+
+/* ═══ ДАЛЬШЕ ═══ */
+.more{margin-top:90px}
+.mhead{font-family:"Golos Text",sans-serif;font-weight:500;font-size:12px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--dimmer);margin-bottom:24px}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:2px}
+.mc{background:var(--surface);text-decoration:none;color:inherit;display:flex;
+  flex-direction:column;overflow:hidden;transition:background .3s,box-shadow .3s}
+.mc:hover{background:rgba(242,242,244,.1);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.18),var(--glow-1)}
+.mc .fr{position:relative;aspect-ratio:3/2;overflow:hidden}
+.mc .im{position:absolute;inset:0;filter:var(--img);
+  transition:transform .7s cubic-bezier(.66,0,.16,1)}
+.mc:hover .im{transform:scale(1.05)}
+.mc .fr::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.3;
+  mix-blend-mode:overlay;
+  background-image:radial-gradient(rgba(0,0,0,.9) 1px,transparent 1.2px);background-size:4px 4px}
+.mc .bd{padding:18px 18px 20px}
+.mc .k{font-size:9.5px;letter-spacing:.17em;text-transform:uppercase;color:var(--dimmer)}
+.mc h3{font-family:"Golos Text",sans-serif;font-weight:500;font-size:15.5px;margin:10px 0 0;
+  line-height:1.34}
+.mc .w{font-size:11px;color:var(--dimmer);margin-top:12px}
+
+.note{margin-top:70px;font-size:12px;color:var(--dimmer);max-width:74ch;line-height:1.7}
+.note b{color:var(--dim);font-weight:500}
+
+@media(max-width:900px){
+  .wrap{padding:32px 20px 90px}
+  .body{grid-template-columns:1fr;gap:38px}
+  .side{position:static}
+  .toc{display:none}
+  article p{text-align:left}
+  h1{max-width:none}
+}
+</style>
+</head>
+<body>
+<div class="prog" id="prog"></div>
+<div class="wrap">
+
+  <nav class="pagenav">
+    <a href="../12-homepage/index.html">← Главная</a>
+    <a href="timetable.html">Расписание</a>
+    <a href="programme.html">Программа</a>
+    <a href="film.html">Фильм</a>
+    <a href="article.html" aria-current="page">Материал</a>
+    <a href="edition.html">Архив</a>
+  </nav>
+
+  <div class="kind">Интервью</div>
+  <h1 class="g">«Плёнка помнит дольше, чем мы»</h1>
+  <div class="dek">Разговор с Анной Цирлиной о разрушении эмульсии, четырёх годах
+    перепечаток и о том, почему изображение честнее, когда оно почти исчезло.</div>
+  <div class="byline"><span>Записала <b>Елиза Тимофеева</b></span><i>|</i>
+    <span>28.07.2026</span><i>|</i><span>12 минут</span></div>
+
+  <div class="cover"><div class="im"></div></div>
+  <div class="cap">Анна Цирлина в мастерской, кадр из съёмки 2025 года. Фото: Даша Чернова</div>
+
+  <div class="body">
+    <article>
+      <p class="lead">Фильм «Нож в сердце Европы» открывает третий сезон. Он снят на 16 мм
+      и перепечатан столько раз, что от исходного материала осталось немногое — и это
+      немногое как раз и есть работа.</p>
+
+      <h2 id="s1">О том, как это началось</h2>
+      <p>Первая печать была обычной. Я сняла материал в 2021-м, проявила, посмотрела —
+      и он мне не понравился ровно тем, чем нравится всем: он был слишком похож на то,
+      что я снимала. Изображение показывало предметы, а мне нужно было, чтобы оно показывало
+      время, которое между мной и предметами прошло.</p>
+      <p>Тогда я стала перепечатывать. Не для эффекта — просто чтобы посмотреть, что уйдёт
+      первым. Уходят края. Уходит резкость там, где меньше контраста. Лица держатся дольше
+      всего, но не потому что они важны, а потому что у них больше перепадов яркости.
+      Плёнка не знает, что такое лицо. Она знает, где свет.</p>
+
+      <figure>
+        <div class="fr"><div class="im"></div></div>
+        <figcaption>Четвёртая и седьмая печати одного кадра, 2023. Между ними два года
+          и пять прогонов.</figcaption>
+      </figure>
+
+      <h2 id="s2">О разрушении как методе</h2>
+      <p>Мне не нравится слово «разрушение», хотя я сама его употребляю. Оно предполагает,
+      что было что-то целое, а стало испорченное. Но эмульсия не портится — она меняет
+      состояние. То, что мы называем повреждением, для материала просто следующий шаг.</p>
+
+      <blockquote>
+        <p>Изображение не исчезает. Оно перестаёт быть похожим на то, с чего началось, —
+        и в этот момент впервые становится собой.</p>
+        <cite>Анна Цирлина</cite>
+      </blockquote>
+
+      <p>Здесь есть ловушка, в которую легко попасть: сделать красивую руину и решить, что
+      этого достаточно. Разрушенное изображение выглядит значительным само по себе, даром.
+      Поэтому я держала правило: если после очередной печати кадр стал только красивее,
+      но не точнее — печать не считается, я возвращаюсь на шаг назад.</p>
+
+      <h2 id="s3">О переходе</h2>
+      <p>Тема сезона — переход, и меня спрашивают, про переход ли мой фильм. Думаю, да,
+      но не в сюжетном смысле. Переход здесь — состояние носителя. Момент, когда изображение
+      уже перестало быть тем, чем было, но ещё не стало ничем. Этот момент длится, если ему
+      не мешать, довольно долго. Собственно, весь фильм в нём и происходит.</p>
+      <p>Мне кажется, это довольно точно описывает и то, зачем вообще нужен такой фестиваль.
+      Не показать готовое, а подержать вещь в состоянии, когда она ещё меняется.</p>
+    </article>
+
+    <div class="side">
+      <div class="toc">
+        <div>В этом тексте</div>
+        <a href="#s1">О том, как это началось</a>
+        <a href="#s2">О разрушении как методе</a>
+        <a href="#s3">О переходе</a>
+      </div>
+      <a class="b" href="film.html"><span>Билет на показ 17.09</span></a>
+      <div class="rel"><b>Нож в сердце Европы</b>
+        Анна Цирлина, Россия, 2025. 82 мин, 16 мм. Фильм открытия третьего сезона.</div>
+    </div>
+  </div>
+
+  <div class="more">
+    <div class="mhead">Читать дальше</div>
+    <div class="mgrid">
+      <a class="mc" href="article.html">
+        <div class="fr"><div class="im" style="background:linear-gradient(148deg,#6E6E76,#1A1A1F 62%,#0B0B0E)"></div></div>
+        <div class="bd"><div class="k">Текст</div>
+          <h3 class="g">Хонтология и кинематограф: что остаётся, когда изображение уходит</h3>
+          <div class="w">14.07.2026 — 18 минут</div></div>
+      </a>
+      <a class="mc" href="article.html">
+        <div class="fr"><div class="im" style="background:linear-gradient(28deg,#0B0B0E,#3A3A41 48%,#8E8E96)"></div></div>
+        <div class="bd"><div class="k">Шоукейс</div>
+          <h3 class="g">Пять работ, с которых начинается сезон «Переход»</h3>
+          <div class="w">02.07.2026 — 7 минут</div></div>
+      </a>
+      <a class="mc" href="article.html">
+        <div class="fr"><div class="im" style="background:radial-gradient(60% 60% at 28% 62%,#94949C,#2E2E34 55%,#0D0D11)"></div></div>
+        <div class="bd"><div class="k">Хроника</div>
+          <h3 class="g">Самиздат «К!»: как собирается номер о лиминальном образе</h3>
+          <div class="w">19.06.2026 — 9 минут</div></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>Единственная страница, где текст — предмет, а не подпись.</b> Отсюда мера в 64 знака,
+    кегль 16.5px и выключка по формату: на кириллице она даёт меньше рваного правого края,
+    чем на латинице, но требует переносов — без <code>hyphens:auto</code> появились бы реки.
+    На узких экранах выключка отключается: при мере меньше 45 знаков она разваливается
+    в любом языке.
+    <b>Липкая боковая колонка</b> держит оглавление и билет в поле зрения — материал про фильм
+    должен вести на показ, иначе это просто чтение.
+    <b>Полоса прочитанного</b> сверху — то же правило «свечение помечает живое».
+  </div>
+
+</div>
+
+<script>
+/* Индикатор прочитанного. Считается от конца статьи, а не документа:
+   подвал и блок «читать дальше» не должны засчитываться как прочитанный текст. */
+const bar=document.getElementById('prog'), art=document.querySelector('article');
+function upd(){
+  const end=art.offsetTop+art.offsetHeight-innerHeight;
+  const p=Math.min(1,Math.max(0,scrollY/Math.max(1,end)));
+  bar.style.width=(p*100).toFixed(2)+'%';
+}
+addEventListener('scroll',upd,{passive:true});
+addEventListener('resize',upd,{passive:true});
+upd();
+</script>
+</body>
+</html>

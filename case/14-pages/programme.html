@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Программа — По-ту-сторонний</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════ ПРОГРАММА ═══════
+   Второй вход в те же данные. Расписание отвечает «что я успею в субботу»,
+   программа — «что вообще показывают». Одни события, разный вопрос.
+   Направление A, каталог: плотный список, фильтры, сортировка. */
+
+:root{
+  --bg:#08080A; --surface:rgba(242,242,244,.045); --ink:#F2F2F4;
+  --dim:#9A9AA2; --dimmer:#6E6E77; --edge:rgba(242,242,244,.16);
+  --glow-1:0 0 18px rgba(242,242,244,.10);
+  --glow-2:0 0 42px rgba(242,242,244,.20);
+  --img:grayscale(1) contrast(1.3) brightness(.62);
+  --h-ctl:40px; --h-ctl-sm:34px;   /* канон высот из 11-specimen */
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;color:var(--ink);font-family:Inter,-apple-system,sans-serif;line-height:1.5;
+  -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;
+  text-shadow:0 0 1px rgba(242,242,244,.22);
+  background:radial-gradient(140% 78% at 50% -8%,#1A1A22 0%,#101015 26%,#0A0A0D 58%,#08080A 100%),#08080A;
+  background-attachment:fixed}
+.g{font-family:"Golos Text",Inter,sans-serif;text-shadow:0 0 2px rgba(242,242,244,.20)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.b{position:relative;display:inline-flex;align-items:center;justify-content:center;
+  height:var(--h-ctl);padding:0 20px;border:0;cursor:pointer;
+  font-family:Inter,sans-serif;font-weight:600;font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;white-space:nowrap;color:var(--ink);text-decoration:none;
+  background:rgba(242,242,244,.028);box-shadow:inset 0 0 0 1px var(--edge);
+  transition:background .34s ease,box-shadow .34s ease}
+.b>*{position:relative;z-index:1}
+.b::after{content:"";position:absolute;left:50%;top:50%;width:130%;height:230%;z-index:0;
+  transform:translate(-50%,-50%) scale(.55);opacity:0;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(242,242,244,.42),transparent 72%);
+  filter:blur(16px);transition:opacity .42s ease,transform .42s ease}
+.b:hover{background:rgba(242,242,244,.10);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.5),var(--glow-2)}
+.b:hover::after{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.b--on,.b[aria-pressed="true"]{background:rgba(242,242,244,.07);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.22)}
+.b--sm{height:var(--h-ctl-sm);padding:0 15px;font-size:10px;letter-spacing:.13em}
+
+
+.wrap{max-width:1280px;margin:0 auto;padding:44px 40px 110px}
+.pagenav{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase}
+.pagenav a{color:var(--dimmer);text-decoration:none;transition:.24s}
+.pagenav a:hover{color:var(--ink);text-shadow:var(--glow-1)}
+.pagenav a[aria-current]{color:var(--ink)}
+h1{font-family:"Golos Text",sans-serif;font-weight:600;font-size:clamp(30px,5vw,54px);
+  letter-spacing:-.015em;text-transform:uppercase;margin:22px 0 0;line-height:1.06}
+.meta{font-size:12.5px;color:var(--dim);margin-top:12px;letter-spacing:.03em}
+.meta i{color:var(--dimmer);font-style:normal;padding:0 8px}
+
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:34px 0 6px}
+.bar .lbl{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dimmer);
+  margin-right:2px}
+.bar .sep{width:1px;height:20px;background:var(--edge);margin:0 6px}
+.bar .right{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.count{font-size:11px;color:var(--dimmer);letter-spacing:.12em;text-transform:uppercase;
+  margin:26px 0 14px}
+
+/* ═══ СПИСОК ═══ */
+.items{display:grid;gap:1px}
+.it{display:grid;grid-template-columns:150px 1fr auto;gap:26px;align-items:center;
+  background:var(--surface);padding:16px 20px 16px 16px;text-decoration:none;color:inherit;
+  transition:background .26s,box-shadow .26s,padding .26s cubic-bezier(.66,0,.16,1)}
+.it:hover{background:rgba(242,242,244,.1);padding-left:24px;
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.18),var(--glow-1)}
+.it .still{position:relative;aspect-ratio:16/9;overflow:hidden;flex:0 0 auto}
+.it .still .im{position:absolute;inset:0;filter:var(--img);
+  transition:transform .7s cubic-bezier(.66,0,.16,1)}
+.it:hover .still .im{transform:scale(1.06)}
+.it .still::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.3;
+  mix-blend-mode:overlay;
+  background-image:radial-gradient(rgba(0,0,0,.9) 1px,transparent 1.2px);background-size:4px 4px}
+.it .strand{font-size:9px;letter-spacing:.17em;text-transform:uppercase;color:var(--dimmer);
+  margin-bottom:6px}
+.it h2{font-family:"Golos Text",sans-serif;font-weight:500;font-size:19px;margin:0;
+  line-height:1.24;letter-spacing:-.006em}
+.it .orig{font-size:11.5px;color:var(--dimmer);margin-top:4px;letter-spacing:.04em}
+.it .cred{font-size:12px;color:var(--dim);margin-top:9px}
+.it .cred i{color:var(--dimmer);font-style:normal;padding:0 6px}
+.it .when{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:9px}
+.it .d{font-family:"Golos Text",sans-serif;font-weight:600;font-size:22px;line-height:1;
+  letter-spacing:-.02em}
+.it .h{font-size:11.5px;color:var(--dim)}
+
+/* ═══ СЕТКА ═══ */
+.items.grid{grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:2px}
+.items.grid .it{grid-template-columns:1fr;gap:0;padding:0;align-items:stretch}
+.items.grid .it:hover{padding-left:0}
+.items.grid .still{width:100%}
+.items.grid .body{padding:18px 18px 20px}
+.items.grid .when{flex-direction:row;align-items:baseline;justify-content:space-between;
+  text-align:left;padding:0 18px 20px;margin-top:auto}
+.items.grid .d{font-size:18px}
+.items:not(.grid) .body{min-width:0}
+
+.empty{padding:40px 0;color:var(--dimmer);font-size:13px}
+.note{margin-top:44px;font-size:12px;color:var(--dimmer);max-width:74ch;line-height:1.7}
+.note b{color:var(--dim);font-weight:500}
+
+@media(max-width:860px){
+  .wrap{padding:32px 20px 90px}
+  .it{grid-template-columns:110px 1fr;gap:16px}
+  .it .when{grid-column:1/-1;flex-direction:row;align-items:baseline;justify-content:flex-start;
+    gap:14px;text-align:left}
+  .items.grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="pagenav">
+    <a href="../12-homepage/index.html">← Главная</a>
+    <a href="timetable.html">Расписание</a>
+    <a href="programme.html" aria-current="page">Программа</a>
+    <a href="film.html">Фильм</a>
+    <a href="article.html">Материал</a>
+    <a href="edition.html">Архив</a>
+  </nav>
+
+  <h1 class="g">Программа</h1>
+  <div class="meta">Сезон 03 «Переход» <i>|</i> 17—20 сентября 2026
+    <i>|</i> Горка, Дом Радио</div>
+
+  <div class="bar">
+    <span class="lbl">Полоса</span>
+    <button class="b b--sm" data-k="s" data-v="all" aria-pressed="true"><span>Все</span></button>
+    <button class="b b--sm" data-k="s" data-v="fest" aria-pressed="false"><span>Фестиваль</span></button>
+    <button class="b b--sm" data-k="s" data-v="lab" aria-pressed="false"><span>Лаборатория</span></button>
+    <button class="b b--sm" data-k="s" data-v="spec" aria-pressed="false"><span>Спецпрограмма</span></button>
+    <button class="b b--sm" data-k="s" data-v="echo" aria-pressed="false"><span>Эхо</span></button>
+  </div>
+
+  <div class="bar">
+    <span class="lbl">Носитель</span>
+    <button class="b b--sm" data-k="f" data-v="all" aria-pressed="true"><span>Любой</span></button>
+    <button class="b b--sm" data-k="f" data-v="16" aria-pressed="false"><span>16 мм</span></button>
+    <button class="b b--sm" data-k="f" data-v="dig" aria-pressed="false"><span>Цифра</span></button>
+    <span class="sep"></span>
+    <span class="lbl">Сортировка</span>
+    <button class="b b--sm" data-k="o" data-v="date" aria-pressed="true"><span>По дате</span></button>
+    <button class="b b--sm" data-k="o" data-v="title" aria-pressed="false"><span>По названию</span></button>
+    <button class="b b--sm" data-k="o" data-v="dur" aria-pressed="false"><span>По длине</span></button>
+    <div class="right">
+      <button class="b b--sm" data-k="v" data-v="list" aria-pressed="true"><span>Список</span></button>
+      <button class="b b--sm" data-k="v" data-v="grid" aria-pressed="false"><span>Сетка</span></button>
+    </div>
+  </div>
+
+  <div class="count" id="count"></div>
+  <div class="items" id="items"></div>
+
+  <div class="note">
+    <b>Тот же набор событий, что в расписании</b> — другой вопрос к нему. Расписание отвечает
+    «что я успею в субботу», программа — «что вообще показывают». Поэтому здесь сортировка
+    и фильтры по свойствам работы (носитель, длина, полоса), а не по времени.
+    <b>Состояние фильтров живёт в адресе</b>: отфильтрованный вид можно переслать.
+    <b>Носитель вынесен в фильтр</b> — для аудитории экспериментального кино 16 мм и цифра
+    это разные события, а не техническая деталь.
+  </div>
+
+</div>
+
+<script>
+/* Форма будущего запроса к Sanity: film, связанный с event.
+   Один фильм может иметь несколько показов — здесь по одному для краткости. */
+const NAME={fest:'Фестиваль',lab:'Лаборатория',spec:'Спецпрограмма',echo:'Эхо'};
+const F=[
+ {t:'Нож в сердце Европы',o:'A Knife in the Heart of Europe',dir:'Анна Цирлина',c:'RU',y:2025,
+  dur:82,fmt:'16',s:'fest',d:17,h:'19:00',v:'Горка',im:'a',note:'Фильм открытия'},
+ {t:'Разговор с другом',o:'A Conversation with a Friend',dir:'Вадим Костров',c:'RU',y:2024,
+  dur:64,fmt:'dig',s:'spec',d:17,h:'21:30',v:'Горка',im:'b'},
+ {t:'Ридинг-группа: лиминальный образ',o:'',dir:'',c:'',y:0,
+  dur:120,fmt:'dig',s:'lab',d:18,h:'14:00',v:'Дом Радио',im:'c',note:'Открытая сессия'},
+ {t:'По ту сторону',o:'The Other Side',dir:'сборная программа',c:'RU / DE',y:2025,
+  dur:94,fmt:'16',s:'fest',d:18,h:'17:00',v:'Горка',im:'d',note:'6 короткометражных'},
+ {t:'Линия отражения',o:'The Line of Reflection',dir:'Сид Яндовка',c:'RU',y:2025,
+  dur:110,fmt:'16',s:'fest',d:18,h:'20:00',v:'Горка',im:'e'},
+ {t:'Мастерская 16 мм',o:'',dir:'',c:'',y:0,
+  dur:180,fmt:'16',s:'spec',d:19,h:'12:30',v:'Горка',im:'b',note:'По записи'},
+ {t:'Показ проектов участников',o:'',dir:'лаборатория',c:'',y:2026,
+  dur:120,fmt:'dig',s:'lab',d:19,h:'16:00',v:'Дом Радио',im:'c'},
+ {t:'Вокруг да около',o:'Round About',dir:'Мария Дементьева',c:'RU',y:2024,
+  dur:68,fmt:'dig',s:'fest',d:19,h:'19:00',v:'Горка',im:'a'},
+ {t:'Эхо: Калининград',o:'',dir:'сборная программа',c:'',y:2026,
+  dur:76,fmt:'dig',s:'echo',d:19,h:'21:00',v:'онлайн',im:'e'},
+ {t:'Эхо: Москва',o:'',dir:'сборная программа',c:'',y:2026,
+  dur:76,fmt:'dig',s:'echo',d:20,h:'14:00',v:'Центр',im:'d'},
+ {t:'Специальная программа',o:'Special Programme',dir:'сборная программа',c:'RU / FR',y:2025,
+  dur:94,fmt:'dig',s:'spec',d:20,h:'17:00',v:'Горка',im:'c'},
+ {t:'Нейрометаморфозы',o:'Neurometamorphoses',dir:'Полина Трубицына',c:'RU',y:2026,
+  dur:110,fmt:'16',s:'fest',d:20,h:'19:30',v:'Горка',im:'a',note:'Фильм закрытия'},
+];
+const IM={a:'radial-gradient(90% 70% at 42% 20%,#8A8A92,#2A2A30 58%,#0C0C10)',
+          b:'radial-gradient(70% 90% at 70% 76%,#7C7C84,#242429 60%,#0A0A0D)',
+          c:'linear-gradient(148deg,#6E6E76,#1A1A1F 62%,#0B0B0E)',
+          d:'radial-gradient(60% 60% at 28% 62%,#94949C,#2E2E34 55%,#0D0D11)',
+          e:'linear-gradient(28deg,#0B0B0E,#3A3A41 48%,#8E8E96)'};
+const st={s:'all',f:'all',o:'date',v:'list'};
+
+function fmtName(f){return f==='16'?'16 мм':'цифра'}
+
+function render(){
+  let list=F.filter(x=>(st.s==='all'||x.s===st.s)&&(st.f==='all'||x.fmt===st.f));
+  list.sort((a,b)=> st.o==='title' ? a.t.localeCompare(b.t,'ru')
+                  : st.o==='dur'   ? b.dur-a.dur
+                  : (a.d-b.d)||a.h.localeCompare(b.h));
+
+  const box=document.getElementById('items');
+  box.className='items'+(st.v==='grid'?' grid':'');
+  document.getElementById('count').textContent =
+    list.length ? `${list.length} из ${F.length} событий` : '';
+
+  box.innerHTML = list.length ? list.map(x=>`
+    <a class="it" href="film.html">
+      <div class="still"><div class="im" style="background:${IM[x.im]}"></div></div>
+      <div class="body">
+        <div class="strand">${NAME[x.s]}${x.note?' — '+x.note:''}</div>
+        <h2 class="g">${x.t}</h2>
+        ${x.o?`<div class="orig">${x.o}</div>`:''}
+        <div class="cred">${[x.dir,[x.c,x.y||''].filter(Boolean).join(' '),
+          x.dur+' мин',fmtName(x.fmt),x.v].filter(Boolean).join(' <i>|</i> ')}</div>
+      </div>
+      <div class="when"><div class="d g">${x.d}.09</div><div class="h">${x.h}</div></div>
+    </a>`).join('')
+    : '<div class="empty">По выбранным фильтрам показов нет. Снимите один из них.</div>';
+
+  document.querySelectorAll('[data-k]').forEach(b=>
+    b.setAttribute('aria-pressed',String(st[b.dataset.k]===b.dataset.v)));
+
+  const p=new URLSearchParams();
+  Object.entries(st).forEach(([k,v])=>{
+    if(!((k==='s'||k==='f')&&v==='all') && !(k==='o'&&v==='date') && !(k==='v'&&v==='list'))
+      p.set({s:'strand',f:'format',o:'sort',v:'view'}[k],v)});
+  history.replaceState(null,'',p.toString()?'?'+p:location.pathname);
+}
+
+/* Читаем состояние из адреса. Значения сверяются со списком допустимых,
+   иначе чужая ссылка с мусором в query сломает вид. */
+const OK={s:['all','fest','lab','spec','echo'],f:['all','16','dig'],
+          o:['date','title','dur'],v:['list','grid']};
+const q=new URLSearchParams(location.search);
+[['strand','s'],['format','f'],['sort','o'],['view','v']].forEach(([qk,k])=>{
+  const val=q.get(qk);
+  if(val && OK[k].includes(val)) st[k]=val;
+});
+
+document.querySelectorAll('[data-k]').forEach(b=>
+  b.onclick=()=>{ st[b.dataset.k]=b.dataset.v; render(); });
+render();
+</script>
+</body>
+</html>

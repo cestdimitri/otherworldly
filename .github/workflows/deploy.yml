@@ -1,0 +1,56 @@
+name: Сборка и выкладка
+
+# Два повода собрать сайт: изменился код, или человек нажал кнопку.
+#
+# Публикация в админке сюда НЕ приходит — и это осознанно. Страницы
+# пересобираются сами раз в 60 секунд (ISR), поэтому полная пересборка
+# на каждую правку запятой заняла бы две минуты вместо одной, ради того же
+# результата. Мгновенное обновление включается позже, вместе с кэшем в R2:
+# раздел «Что дальше» в DEPLOY.md.
+on:
+  push:
+    branches: [main]
+    paths: ['site/**', '.github/workflows/deploy.yml']
+  workflow_dispatch:
+
+# Если пока идёт сборка прилетел ещё один пуш, старую отменяем: выкладывать
+# промежуточное состояние поверх свежего — худший из возможных исходов.
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Установка зависимостей
+        run: npm ci
+
+      # Проверка типов отдельным шагом, а не внутри сборки: если сломались
+      # типы, хочется видеть это в названии упавшего шага, а не искать
+      # в логе сборки.
+      - name: Проверка типов
+        run: npm run typecheck
+
+      - name: Сборка и выкладка
+        run: npx opennextjs-cloudflare build && npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # Ключи Sanity нужны на СБОРКЕ: страницы фильмов и сезонов
+          # рендерятся заранее, и без них соберутся демо-данные.
+          NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ secrets.SANITY_PROJECT_ID }}
+          NEXT_PUBLIC_SANITY_DATASET: ${{ secrets.SANITY_DATASET }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.SITE_URL }}

@@ -1,0 +1,28 @@
+/* Мера и типографика те же, что у материала: это тоже страница, где текст —
+   предмет, а не подпись. Отдельного набора правил заводить незачем. */
+.wrap{max-width:1180px;margin:0 auto;padding:120px 40px 120px}
+.h1{font-weight:600;font-size:clamp(30px,5vw,58px);letter-spacing:-.02em;
+  margin:0;line-height:1.08;max-width:17ch}
+.lead{font-size:19px;line-height:1.62;color:var(--ink);margin:22px 0 0;max-width:54ch}
+.cover{aspect-ratio:21/9;margin-top:40px}
+.cover img{display:block;width:100%;height:100%;object-fit:cover;filter:var(--img)}
+
+.body{max-width:64ch;margin-top:52px}
+.body p{font-size:16.5px;line-height:1.76;color:var(--dim);margin:0 0 22px;
+  text-align:justify;hyphens:auto}
+.body h2{font-weight:500;font-size:22px;letter-spacing:-.008em;color:var(--ink);
+  margin:44px 0 16px;line-height:1.3}
+.body h3{font-weight:500;font-size:17px;color:var(--ink);margin:32px 0 12px;line-height:1.35}
+.body ul,.body ol{margin:0 0 22px;padding-left:20px;color:var(--dim);font-size:16.5px;
+  line-height:1.76}
+.body li{margin-bottom:8px}
+.body blockquote{margin:34px 0;padding:0 0 0 22px;box-shadow:inset 2px 0 0 var(--edge)}
+.body blockquote p{font-size:19px;line-height:1.52;color:var(--ink);text-align:left;margin:0}
+.body a{color:var(--ink);text-decoration:none;box-shadow:inset 0 -1px 0 var(--edge);
+  transition:box-shadow .24s,text-shadow .24s}
+.body a:hover{box-shadow:inset 0 -1px 0 var(--ink);text-shadow:var(--glow-1)}
+
+@media(max-width:880px){
+  .wrap{padding:100px 20px 90px}
+  .body p{text-align:left}
+}

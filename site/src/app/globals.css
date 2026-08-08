@@ -1,0 +1,164 @@
+/* ═══════════ ТОКЕНЫ ═══════════
+   Единственное место, где они объявлены. В прототипах на статических файлах
+   :root и .b лежали в каждом из семи файлов и успели разъехаться на пять
+   вариантов примитива — именно поэтому систему сводили до переноса в код,
+   а не после. Источник значений: case/11-specimen/index.html.            */
+
+:root{
+  --bg:#08080A;
+  --surface:rgba(242,242,244,.045);
+  --surface-2:rgba(242,242,244,.10);
+  --edge:rgba(242,242,244,.16);
+  --ink:#F2F2F4;
+  --dim:#9A9AA2;
+  --dimmer:#6E6E77;
+
+  --glow-1:0 0 18px rgba(242,242,244,.10);
+  --glow-2:0 0 42px rgba(242,242,244,.20);
+  --glow-3:0 0 90px rgba(242,242,244,.30);
+
+  --img:grayscale(1) contrast(1.3) brightness(.62);
+
+  --h-ctl:40px; --h-ctl-sm:34px;
+  --gap-hair:1px; --gap-tile:2px;
+  --ease:cubic-bezier(.66,0,.16,1);
+  --r-dock:20px; --r-in:12px;      /* скругления живут только в доке */
+}
+
+/* Архив — задокументированный вариант, а не правка по месту.
+   Закрытый сезон глуше: приглушены сигналы действия, не содержание. */
+[data-mode="archive"]{
+  --surface:rgba(242,242,244,.04);
+  --edge:rgba(242,242,244,.13);
+}
+
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{
+  margin:0;color:var(--ink);line-height:1.5;
+  font-family:var(--font-inter),-apple-system,"Helvetica Neue",Arial,sans-serif;
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+  text-shadow:0 0 1px rgba(242,242,244,.22);   /* растекание краски по волокну */
+  background:
+    radial-gradient(140% 78% at 50% -8%,#1A1A22 0%,#101015 26%,#0A0A0D 58%,#08080A 100%),
+    #08080A;
+  background-attachment:fixed;                  /* свет в зале, а не декор страницы */
+}
+.g{font-family:var(--font-golos),var(--font-inter),sans-serif;
+   text-shadow:0 0 2px rgba(242,242,244,.20)}
+
+/* Архивная страница глуше и по фону: проектор выключен */
+body[data-mode="archive"]{
+  text-shadow:0 0 1px rgba(242,242,244,.18);
+  background:
+    radial-gradient(140% 78% at 50% -8%,#141419 0%,#0D0D11 30%,#09090C 62%,#08080A 100%),
+    #08080A;
+}
+
+@media(prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
+
+/* ═══ ЕДИНСТВЕННЫЙ ИНТЕРАКТИВНЫЙ ПРИМИТИВ ═══ */
+.b{
+  position:relative;display:inline-flex;align-items:center;justify-content:center;
+  height:var(--h-ctl);padding:0 20px;border:0;cursor:pointer;text-decoration:none;
+  font-family:inherit;font-weight:600;font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;white-space:nowrap;color:var(--ink);
+  background:rgba(242,242,244,.028);
+  box-shadow:inset 0 0 0 1px var(--edge);
+  transition:background .34s ease,box-shadow .34s ease;
+}
+.b>*{position:relative;z-index:1}
+.b::after{
+  content:"";position:absolute;left:50%;top:50%;width:130%;height:230%;z-index:0;
+  transform:translate(-50%,-50%) scale(.55);opacity:0;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(242,242,244,.42),transparent 72%);
+  filter:blur(16px);
+  transition:opacity .42s var(--ease),transform .42s var(--ease);
+}
+.b:hover{background:var(--surface-2);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.5),var(--glow-2)}
+.b:hover::after{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.b:disabled{opacity:.45;cursor:default}
+.b:disabled:hover{background:rgba(242,242,244,.028);
+  box-shadow:inset 0 0 0 1px var(--edge)}
+.b:disabled:hover::after{opacity:0}
+.b--on,.b[aria-pressed="true"]{background:rgba(242,242,244,.07);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.22)}
+.b--sm{height:var(--h-ctl-sm);padding:0 15px;font-size:10px;letter-spacing:.13em}
+
+/* ═══ ПОВТОРЯЮЩИЕСЯ ПАТТЕРНЫ ═══ */
+/* Подпись категории — один слот на весь сайт: полоса, тип материала,
+   фаза сезона. Категорию называет слово, а не цвет и не значок. */
+.k{font-size:9px;letter-spacing:.17em;text-transform:uppercase;color:var(--dimmer)}
+
+/* Поверхность списка. Разделителей нет — разделяет зазор. */
+.surface{background:var(--surface);transition:background .26s,box-shadow .26s}
+.surface:hover{background:var(--surface-2);
+  box-shadow:inset 0 0 0 1px rgba(242,242,244,.18),var(--glow-1)}
+.stack{display:grid;gap:var(--gap-hair)}
+.tiles{display:grid;gap:var(--gap-tile)}
+
+/* Кадр: фильтр + чёрный растр. Текстура принадлежит материалу. */
+.frame{position:relative;overflow:hidden;background:var(--surface)}
+.frame img,.frame .ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  filter:var(--img);transition:transform .7s var(--ease)}
+.frame::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.3;
+  mix-blend-mode:overlay;
+  background-image:radial-gradient(rgba(0,0,0,.9) 1px,transparent 1.2px);
+  background-size:4px 4px}
+a:hover .frame img,a:hover .frame .ph{transform:scale(1.05)}
+
+/* ═══ ДОК ═══
+   Стеклянная панель в луче: проекция читается СКВОЗЬ неё.
+   Край собран из четырёх слоёв вместо жёсткой линейки — блик по верхней
+   кромке идёт оттуда же, откуда луч. Единственное место со скруглениями. */
+.dock{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:70;
+  display:flex;align-items:center;gap:30px;padding:11px 14px 11px 22px;
+  max-width:calc(100vw - 32px);border-radius:var(--r-dock);
+  background:rgba(16,16,21,.34);
+  backdrop-filter:blur(30px) saturate(1.35);-webkit-backdrop-filter:blur(30px) saturate(1.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.11),
+    inset 0 0 0 1px rgba(242,242,244,.085),
+    0 18px 50px rgba(0,0,0,.5), 0 2px 10px rgba(0,0,0,.32);
+  transition:top .3s var(--ease),background .3s ease}
+.dock:hover{background:rgba(16,16,21,.46)}
+.dock.away{top:-140px}
+.dock .b{border-radius:var(--r-in)}
+.dock nav{display:flex;gap:18px;font-size:12.5px;font-weight:500}
+.dock nav a{color:var(--dim);text-decoration:none;transition:.26s;white-space:nowrap}
+.dock nav a:hover{color:var(--ink);text-shadow:var(--glow-1),0 0 3px rgba(242,242,244,.5)}
+.dock .sp{margin-left:auto;display:flex;align-items:center;gap:16px}
+.dock .lang a{font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--dimmer);text-decoration:none;transition:.25s}
+.dock .lang a:hover{color:var(--ink);text-shadow:var(--glow-1)}
+
+.burger{all:unset;display:none;cursor:pointer;width:38px;height:38px;position:relative;
+  border-radius:var(--r-in);box-shadow:inset 0 0 0 1px rgba(242,242,244,.11);flex:0 0 auto;
+  transition:box-shadow .3s ease,background .3s ease}
+.burger:hover{background:rgba(242,242,244,.07);box-shadow:inset 0 0 0 1px rgba(242,242,244,.28)}
+.burger i{position:absolute;left:11px;width:16px;height:1px;background:var(--ink);
+  transition:transform .34s var(--ease),opacity .2s}
+.burger i:nth-child(1){top:14px} .burger i:nth-child(2){top:19px} .burger i:nth-child(3){top:24px}
+.burger[aria-expanded="true"] i:nth-child(1){transform:translateY(5px) rotate(45deg)}
+.burger[aria-expanded="true"] i:nth-child(2){opacity:0}
+.burger[aria-expanded="true"] i:nth-child(3){transform:translateY(-5px) rotate(-45deg)}
+
+.menu{position:fixed;inset:0;z-index:75;display:flex;flex-direction:column;
+  justify-content:center;gap:2px;padding:0 24px;
+  background:radial-gradient(120% 70% at 50% 0%,#16161D,#08080A 70%);
+  opacity:0;pointer-events:none;transition:opacity .32s ease}
+.menu.on{opacity:1;pointer-events:auto}
+.menu a{font-family:var(--font-golos),sans-serif;font-weight:500;
+  font-size:clamp(28px,8.6vw,44px);text-transform:uppercase;letter-spacing:-.01em;
+  color:var(--dim);text-decoration:none;padding:10px 0;transition:.26s}
+.menu a:hover,.menu a:focus{color:var(--ink);text-shadow:var(--glow-2)}
+
+@media(max-width:900px){
+  .dock{left:12px;right:12px;transform:none;max-width:none;gap:14px;padding:10px 12px}
+  .dock nav{display:none}
+  .burger{display:block}
+}

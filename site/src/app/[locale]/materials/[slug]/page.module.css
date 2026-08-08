@@ -1,0 +1,30 @@
+.wrap{max-width:1180px;margin:0 auto;padding:120px 40px 120px}
+.h1{font-weight:600;font-size:clamp(28px,4.4vw,50px);letter-spacing:-.018em;
+  margin:14px 0 0;line-height:1.14;max-width:19ch}
+.dek{font-size:16px;line-height:1.6;color:var(--dim);margin-top:18px;max-width:56ch}
+.byline{margin-top:22px;font-size:12px;color:var(--dim)}
+.cover{aspect-ratio:21/9;margin-top:34px}
+.cover img{display:block;width:100%;height:100%;object-fit:cover;filter:var(--img)}
+/* Мера, кегль и выключка — из прототипа: текст здесь предмет, а не подпись */
+.body{max-width:64ch;margin-top:52px}
+.body p{font-size:16.5px;line-height:1.76;color:var(--dim);margin:0 0 22px;
+  text-align:justify;hyphens:auto}
+.lead{font-size:19px;line-height:1.62;color:var(--ink);text-align:left}
+.body>p:first-child{font-size:19px;line-height:1.62;color:var(--ink);text-align:left}
+.body h2{font-weight:500;font-size:22px;letter-spacing:-.008em;color:var(--ink);
+  margin:44px 0 16px;line-height:1.3}
+.body h3{font-weight:500;font-size:17px;color:var(--ink);margin:32px 0 12px;line-height:1.35}
+.body ul,.body ol{margin:0 0 22px;padding-left:20px;color:var(--dim);font-size:16.5px;
+  line-height:1.76}
+.body li{margin-bottom:8px}
+/* Цитата отбивается сдвигом и одной световой кромкой — разделителей в системе нет */
+.body blockquote{margin:34px 0;padding:0 0 0 22px;box-shadow:inset 2px 0 0 var(--edge)}
+.body blockquote p{font-size:19px;line-height:1.52;color:var(--ink);text-align:left;margin:0}
+.body a{color:var(--ink);text-decoration:none;box-shadow:inset 0 -1px 0 var(--edge);
+  transition:box-shadow .24s,text-shadow .24s}
+.body a:hover{box-shadow:inset 0 -1px 0 var(--ink);text-shadow:var(--glow-1)}
+@media(max-width:900px){
+  .wrap{padding:110px 20px 90px}
+  .h1{max-width:none}
+  .body p{text-align:left}   /* при мере <45 знаков выключка разваливается */
+}

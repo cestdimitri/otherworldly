@@ -1,0 +1,5 @@
+.fig { margin: 38px 0; }
+.fig img { display: block; width: 100%; height: auto; filter: var(--img); }
+.fig figcaption {
+  margin-top: 9px; font-size: 11px; letter-spacing: .03em; color: var(--dimmer);
+}
