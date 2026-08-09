@@ -20,7 +20,7 @@ international film festival-laboratory based in St. Petersburg.
 | 04 | [CMS & hosting architecture](04-cms-architecture.md) | Next.js + Sanity, cost, bilingual mechanism, content model, Timepad, deployment |
 | 05 | [Information architecture](05-information-architecture.md) | Sitemap, URL scheme, navigation, page models, user flows, traceability |
 | 06 | [Wireframes](06-wireframes/) | Three interactive low-fi directions — **open `index.html`** |
-| 07 | [Process log](07-process-log.md) | Dated sessions, **112 numbered decisions**, open items |
+| 07 | [Process log](07-process-log.md) | Dated sessions, **117 numbered decisions**, open items |
 | 08 | [Visual audit](08-visual-audit.md) | What the current site gets right, what's broken, measured before-state, rendering defects |
 | 09 | [Two worlds](09-two-worlds.md) | ⚠️ **Superseded 3 Aug.** The dual-register system, designed and built, then cut. Kept as the record of a rejected direction |
 | 10 | [Visual direction](10-visual-direction.md) | References decoded, 11 revisions, the palette and its corrections |
@@ -112,7 +112,7 @@ otherworldly/
     ├── 04-cms-architecture.md          Next.js + Sanity, Timepad, content model
     ├── 05-information-architecture.md  sitemap, URLs, flows
     ├── 06-wireframes/                  A / B / C — open index.html
-    ├── 07-process-log.md               sessions, 112 decisions, open items
+    ├── 07-process-log.md               sessions, 117 decisions, open items
     ├── 08-visual-audit.md              current site measured, defects found
     ├── 09-two-worlds.md                ⚠ superseded — kept as a rejected system
     ├── 10-visual-direction.md          references decoded, 11 revisions

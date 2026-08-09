@@ -1,3 +1,5 @@
+import type { Metadata } from 'next'
+import { pageMeta } from '@/lib/meta'
 import { notFound } from 'next/navigation'
 import { q, qWithSource } from '@/sanity/client'
 import { groq } from 'next-sanity'
@@ -31,6 +33,20 @@ const EDITION_BY_YEAR = groq`
   _id, year, title, theme, startDate, endDate, status, vectors, cities, statement
 }`
 
+export async function generateMetadata({
+  params,
+}: { params: Promise<{ locale: string; year: string }> }): Promise<Metadata> {
+  const { locale: raw, year } = await params
+  const locale = (isLocale(raw) ? raw : 'ru') as Locale
+  return pageMeta({
+    locale, path: `/archive/${year}`,
+    title: `${year} — По-ту-сторонний`,
+    description: locale === 'ru'
+      ? `Программа сезона ${year} года.`
+      : `The ${year} season programme.`,
+  })
+}
+
 export default async function EditionPage({
   params,
 }: { params: Promise<{ locale: string; year: string }> }) {
@@ -52,7 +68,7 @@ export default async function EditionPage({
     ? seedEvents
     : await q<EventItem[]>(
         groq`*[_type=="event" && edition._ref==$id] | order(startsAt asc){
-          _id, slug, title, strand, startsAt, duration, format, venue->{name}
+          _id, "slug": slug.current, title, strand, startsAt, duration, format, venue->{name}
         }`, { id: edition._id }, seedEvents)
 
   const closed = edition.status === 'archived'

@@ -588,3 +588,63 @@ D-112 | 2026-08-08 | Two data sources must never be mixed within one page
         back the current edition regardless of the year requested. It lied confidently and
         invisibly, which is the worst way for a fallback to fail.
 ```
+
+## Review, 8 August — after the client challenged the results
+
+Dmitrii's check kept failing and he asked for a proper review instead of another
+one-bug-at-a-time fix. He was right to. Five defects, found by querying the live dataset
+rather than reasoning about it.
+
+```
+D-113 | 2026-08-08 | The homepage queried for a status that contradicts its own design
+        CURRENT_EDITION required status=="current". The homepage COUNTS DOWN to the start
+        date — it is built for a season that has not begun. "Current" means happening now.
+        The schema's own default is "upcoming", so the first season any curator creates
+        was guaranteed never to appear, and she would see demo data with no hint why.
+        Now: nearest non-archived season by start date. Running festival wins (earlier
+        date); otherwise the next one. Nothing to toggle by hand, and no gap between
+        seasons. Verified against the live dataset, not assumed.
+
+D-114 | 2026-08-08 | Fallback happens only when Sanity is not configured. Full stop.
+        Third revision of this rule; the first two were wrong the same way — both allowed
+        one page to hold data from two sources. Symptoms on the live project: a real season
+        with demo events; /ru/about rendering while the menu had no link to it, because the
+        single-document query fell back on null and the list query returned a legitimate
+        empty array.
+        Every one of those states exists in neither reality and looks like a working site.
+        Rule now: no keys → the whole site is demo; keys → everything from the dataset,
+        including emptiness. An empty CMS shows an empty site. That is the truth about its
+        state, and it is more useful to a curator than a convincing fake.
+
+D-115 | 2026-08-08 | Five of nine routes declared themselves the homepage
+        The locale layout's generateMetadata uses path:''. Any page without its own
+        metadata inherited it, so /ru/timetable told search engines its canonical URL was
+        /ru, and its hreflang pointed at the homepage rather than /en/timetable.
+        The visible language switcher was correct throughout — only the machine-readable
+        half was wrong, which is why eleven revisions of visual review never caught it.
+
+D-116 | 2026-08-08 | Sitemap listed demo films and demo pages
+        18 URLs, four of which 404 on the live dataset. Now queried.
+
+D-117 | 2026-08-08 | Event slug was projected as an object, typed as a string
+        `_id, slug, …` returns {_type:'slug', current:'test'}. Nothing dereferenced it yet,
+        so nothing was visibly broken — the next link built from it would have produced
+        "[object Object]". Found by reading the API response, not the code.
+```
+
+### On the check script
+
+Worth recording separately, because the tooling failed harder than the code.
+
+The first version reported ✓ on an empty response — every negative assertion ("the
+placeholder string is absent") passes when there is no input at all. The second version
+searched for one known-bad value (`otherworldly.example`) and so waved through
+`http://localhost:3000`, which is the same defect in the same place. It also grepped for
+`hreflang` while Next.js emits `hrefLang`, reporting three failures on three working tags.
+
+Two lessons, both general:
+
+- Assert against the expected value, never against a list of anticipated wrong ones.
+  The wrong value you fail to anticipate is the one you will ship.
+- A test that cannot fail is worse than no test, because it is read as evidence.
+```

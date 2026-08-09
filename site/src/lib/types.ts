@@ -16,7 +16,7 @@ export type Edition = {
   _id: string; year: number; title: I18n; theme?: I18n
   startDate: string; endDate: string
   status: 'upcoming' | 'current' | 'archived'
-  vectors?: string[]; cities?: string[]; statement?: I18n
+  vectors?: string[]; cities?: string[]; statement?: I18n; cover?: Img
 }
 /** Изображение с описанием — форма, которую отдаёт схема captionedImage. */
 export type Img = {
@@ -48,3 +48,5 @@ export type Screening = {
   venue?: Venue
   edition: { year: number; title?: I18n; status: Edition['status'] }
 }
+
+export type Person = { _id: string; name?: string; role?: I18n; portrait?: Img }

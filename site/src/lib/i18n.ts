@@ -26,6 +26,11 @@ export const dict = {
     season: 'Лента сезона', soon: 'Скоро в продаже', daysLeft: 'До фестиваля',
     days: 'дней', projectorOn: 'Проектор включится', min: 'мин',
     strands: { fest: 'Фестиваль', lab: 'Лаборатория', spec: 'Спецпрограмма', echo: 'Эхо' },
+    team: 'Кураторки', past: 'Прошлые сезоны', allMaterials: 'Все материалы',
+    allSeasons: 'Весь архив',
+    // Описание фестиваля. Постоянное — не привязано к сезону, поэтому
+    // живёт здесь, а не в базе. В сезоне лежит его собственное заявление.
+    intro: '«По-ту-сторонний» — фестиваль-лаборатория, где кино становится инструментом исследования. Мы соединяем теорию кино с практикой экспериментального кинематографа. Каждый сезон — новые тематические и метафорические векторы, которые развиваются вместе с режиссёрами, зрителями и кураторами',
     phases: { done: 'Завершено', now: 'Идёт сейчас', next: 'Впереди' },
   },
   en: {
@@ -34,6 +39,9 @@ export const dict = {
     season: 'Season', soon: 'On sale soon', daysLeft: 'Festival in',
     days: 'days', projectorOn: 'Projector on', min: 'min',
     strands: { fest: 'Festival', lab: 'Laboratory', spec: 'Special', echo: 'Echo' },
+    team: 'Curators', past: 'Past seasons', allMaterials: 'All materials',
+    allSeasons: 'Full archive',
+    intro: 'Otherworldly is a festival-laboratory where cinema becomes an instrument of research. We join film theory to the practice of experimental cinema. Each season brings new thematic and metaphorical vectors, developed together with directors, audiences and curators',
     phases: { done: 'Finished', now: 'Now', next: 'Ahead' },
   },
 } as const

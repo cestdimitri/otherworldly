@@ -1,9 +1,23 @@
 import { groq } from 'next-sanity'
 
-/** Текущий сезон — от его дат зависит вся лента на главной. */
+/**
+ * Сезон, о котором сайт рассказывает сейчас. От его дат зависит вся лента
+ * на главной.
+ *
+ * Раньше здесь стояло status=="current", и это было прямым противоречием:
+ * главная СЧИТАЕТ ОБРАТНЫЙ ОТСЧЁТ до начала, то есть рассчитана на сезон,
+ * который ещё не наступил, — а «current» означает «идёт прямо сейчас».
+ * Значение по умолчанию в схеме — «готовится», так что первый же заведённый
+ * кураторкой сезон гарантированно не попадал на сайт, и она видела
+ * демо-данные без единого намёка на причину.
+ *
+ * Теперь берём ближайший незакрытый сезон по дате начала. Если идёт
+ * фестиваль — возьмётся он (его дата раньше). Если не идёт — следующий.
+ * Между сезонами сайт не пустеет, и никакое поле руками переключать не надо.
+ */
 export const CURRENT_EDITION = groq`
-*[_type=="edition" && status=="current"][0]{
-  _id, year, title, theme, startDate, endDate, status, vectors, cities, statement
+*[_type=="edition" && status != "archived"] | order(startDate asc)[0]{
+  _id, year, title, theme, startDate, endDate, status, vectors, cities, statement, cover
 }`
 
 /**
@@ -13,7 +27,7 @@ export const CURRENT_EDITION = groq`
  */
 export const EVENTS_BY_EDITION = groq`
 *[_type=="event" && edition._ref==$editionId] | order(startsAt asc){
-  _id, slug, title, strand, startsAt, duration, format, timepadEventId,
+  _id, "slug": slug.current, title, strand, startsAt, duration, format, timepadEventId,
   venue->{_id, name, city},
   films[]->{_id, "slug": slug.current, title, director, year, duration}
 }`
@@ -57,4 +71,16 @@ export const PAGE_BY_SLUG = groq`
 
 export const PAGE_SLUGS = groq`*[_type=="page" && defined(slug.current)]{
   "slug": slug.current
+}`
+
+/** Прошедшие сезоны — короткий список на главную, полный лежит в архиве. */
+export const PAST_EDITIONS = groq`
+*[_type=="edition" && status=="archived"] | order(year desc)[0...2]{
+  _id, year, title, theme, cities
+}`
+
+/** Кураторки текущего сезона. */
+export const CURATORS = groq`
+*[_type=="edition" && _id==$editionId][0].curators[]->{
+  _id, name, role, portrait
 }`

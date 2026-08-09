@@ -1,3 +1,5 @@
+import type { Metadata } from 'next'
+import { pageMeta } from '@/lib/meta'
 import { notFound } from 'next/navigation'
 import { q, qWithSource } from '@/sanity/client'
 import { CURRENT_EDITION, EVENTS_BY_EDITION } from '@/sanity/queries'
@@ -24,6 +26,18 @@ const SLOTS = Math.round((END - START) / 30)
 const minutes = (iso: string) => {
   const d = new Date(iso)
   return d.getHours() * 60 + d.getMinutes()
+}
+
+export async function generateMetadata({
+  params,
+}: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale: raw } = await params
+  const locale = (isLocale(raw) ? raw : 'ru') as Locale
+  return pageMeta({
+    locale, path: '/timetable',
+    title: `${locale === 'ru' ? 'Расписание' : 'Timetable'} — По-ту-сторонний`,
+    description: locale === 'ru' ? 'Расписание показов и событий сезона.' : 'Screenings and events, by day and hour.',
+  })
 }
 
 export default async function Timetable({ params }: { params: Promise<{ locale: string }> }) {

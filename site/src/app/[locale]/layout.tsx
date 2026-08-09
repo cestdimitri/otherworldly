@@ -4,6 +4,7 @@ import { Dock, type NavPage } from '@/components/Dock'
 import { Footer } from '@/components/Footer'
 import { isLocale, locales, t, type Locale } from '@/lib/i18n'
 import { pageMeta } from '@/lib/meta'
+import { now } from '@/lib/now'
 import { seedPages } from '@/lib/seed'
 import type { Page } from '@/lib/types'
 import { q } from '@/sanity/client'
@@ -46,7 +47,7 @@ export default async function LocaleLayout({
     <>
       <Dock locale={locale} pages={pages} />
       {children}
-      <Footer locale={locale} year={2026} />
+      <Footer locale={locale} year={now().getFullYear()} />
     </>
   )
 }

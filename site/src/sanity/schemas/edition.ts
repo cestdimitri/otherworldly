@@ -23,6 +23,8 @@ export const edition = defineType({
         { title: 'Текущий', value: 'current' },
         { title: 'Закрыт (архив)', value: 'archived' }] },
       initialValue: 'upcoming' }),
+    defineField({ name: 'cover', title: 'Фон первого экрана', type: 'captionedImage',
+      description: 'Крупное фото на весь первый экран. Обрезается по точке фокуса.' }),
     defineField({ name: 'cities', title: 'Города', type: 'array', of: [{ type: 'string' }] }),
     defineField({ name: 'curators', title: 'Кураторки', type: 'array',
       of: [{ type: 'reference', to: [{ type: 'person' }] }] }),

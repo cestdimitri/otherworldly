@@ -1,10 +1,12 @@
 import { q, qWithSource } from '@/sanity/client'
-import { CURRENT_EDITION, EVENTS_BY_EDITION } from '@/sanity/queries'
-import { seedEdition, seedEvents } from '@/lib/seed'
+import { ARTICLES, CURATORS, CURRENT_EDITION, EVENTS_BY_EDITION, PAST_EDITIONS } from '@/sanity/queries'
+import { seedArticles, seedEdition, seedEvents } from '@/lib/seed'
 import { now } from '@/lib/now'
 import { dict, isLocale, t, type Locale } from '@/lib/i18n'
-import type { Edition, EventItem } from '@/lib/types'
+import type { Article, Edition, EventItem, Person } from '@/lib/types'
 import { TicketButton } from '@/components/TicketButton'
+import { urlFor } from '@/sanity/image'
+import Link from 'next/link'
 import { B } from '@/components/B'
 import { notFound } from 'next/navigation'
 import styles from './page.module.css'
@@ -17,9 +19,26 @@ import styles from './page.module.css'
  */
 export const revalidate = 60
 
+/**
+ * Запасной фон: положить файл в site/public/hero.jpg.
+ * Пустая строка означает «файла нет» — тогда рисуется градиент.
+ */
+const HERO_FALLBACK = '/hero.png'
+
 type Phase = {
   id: string; when: string; state: 'done' | 'now' | 'next' | 'ahead'
   title: string; text: string
+}
+
+/** Даты сезона одной строкой. Раньше здесь стояли вписанные руками 17—20.09. */
+function dateRange(ed: Edition, locale: Locale): string {
+  const s = new Date(ed.startDate)
+  const e = new Date(ed.endDate)
+  const dd = (x: Date) => String(x.getDate()).padStart(2, '0')
+  const mm = (x: Date) => String(x.getMonth() + 1).padStart(2, '0')
+  return s.getMonth() === e.getMonth()
+    ? `${dd(s)}—${dd(e)}.${mm(e)}.${ed.year}`
+    : `${dd(s)}.${mm(s)} — ${dd(e)}.${mm(e)}.${ed.year}`
 }
 
 function buildPhases(ed: Edition, locale: Locale, today: Date): Phase[] {
@@ -71,6 +90,19 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
     ? seedEvents
     : await q<EventItem[]>(EVENTS_BY_EDITION, { editionId: edition._id }, seedEvents)
 
+  // Разделы ниже показываются только если для них есть содержимое:
+  // пустой блок с заголовком выглядит как поломка, а не как «пока нет».
+  const [articles, past, curators] = await Promise.all([
+    q<Article[]>(ARTICLES, { locale, limit: 4 }, seedArticles.slice(0, 4)),
+    q<Edition[]>(PAST_EDITIONS, {}, []),
+    fromSeed ? Promise.resolve([] as Person[])
+             : q<Person[]>(CURATORS, { editionId: edition._id }, []),
+  ])
+
+  // Фон первого экрана. Кураторка меняет его в админке; пока не загрузила —
+  // берётся файл public/hero.jpg, а если и его нет, остаётся градиент.
+  const heroUrl = urlFor(edition.cover, 2200) ?? HERO_FALLBACK
+
   const phases = buildPhases(edition, locale, now())
   const days = events.slice(0, 4)
   const theme = t(edition.theme, locale)
@@ -79,17 +111,28 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   return (
     <main className={styles.main}>
       <section className={styles.hero}>
-        <div className={styles.plate} aria-hidden />
+        {heroUrl ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img className={styles.photo} src={heroUrl} alt={edition.cover?.alt ?? ''} />
+        ) : (
+          <div className={styles.plate} aria-hidden />
+        )}
         <div className={styles.beam} aria-hidden />
         <div className={styles.vig} aria-hidden />
         <div className={styles.heroIn}>
-          <h1 className={`g ${styles.wordmark}`}>По-ту-сторонний</h1>
+          <h1 className={`g ${styles.wordmark}`}>
+            {locale === 'ru' ? <>Независимый<br />кинофестиваль<br />«По-ту-сторонний»</>
+                             : <>Independent<br />film festival<br />“Otherworldly”</>}
+          </h1>
           <div className={`g ${styles.sub}`}>
             <span>{t(edition.title, locale).text} — «{theme.text}»</span>
-            <i>|</i><span>17—20.09.{edition.year}</span>
+            <i>|</i><span>{dateRange(edition, locale)}</span>
             <i>|</i><span>{locale === 'ru' ? 'Санкт-Петербург' : 'St. Petersburg'}</span>
           </div>
-          <p className={styles.lede} lang={statement.lang}>{statement.text}</p>
+          <p className={styles.lede}>{d.intro}</p>
+          {statement.text && (
+            <p className={styles.stmt} lang={statement.lang}>{statement.text}</p>
+          )}
           <div className={styles.cta}>
             <B href={`/${locale}/timetable`}>{d.tickets}</B>
             <B href={`/${locale}/timetable`}>{d.timetable}</B>
@@ -138,6 +181,73 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           ))}
         </div>
       </section>
+
+      {articles.length > 0 && (
+        <section className={styles.section}>
+          <h2 className={`g ${styles.shead}`}>{d.materials}</h2>
+          <div className={styles.mats}>
+            {articles.map((a) => (
+              <Link key={a._id} href={`/${locale}/materials/${a.slug}`}
+                    className={`surface ${styles.mat}`}>
+                <div className={`frame ${styles.cov}`}>
+                  {urlFor(a.cover, 800)
+                    ? /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={urlFor(a.cover, 800)} alt={a.cover?.alt ?? ''} />
+                    : <div className="ph" />}
+                </div>
+                <div className={styles.matBd}>
+                  <div className="k">{a.kind}</div>
+                  <div className={`g ${styles.matTitle}`}>{a.title}</div>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <div className={styles.more}>
+            <B href={`/${locale}/materials`}>{d.allMaterials}</B>
+          </div>
+        </section>
+      )}
+
+      {curators.length > 0 && (
+        <section className={styles.section}>
+          <h2 className={`g ${styles.shead}`}>{d.team}</h2>
+          <div className={styles.team}>
+            {curators.map((p) => (
+              <div key={p._id} className={styles.por}>
+                <div className={`frame ${styles.porIm}`}>
+                  {urlFor(p.portrait, 600)
+                    ? /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={urlFor(p.portrait, 600)} alt={p.portrait?.alt ?? ''} />
+                    : <div className="ph" />}
+                </div>
+                <div className={`g ${styles.porName}`}>{p.name}</div>
+                <div className={styles.porRole}>{t(p.role, locale).text}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {past.length > 0 && (
+        <section className={styles.section} data-mode="archive">
+          <h2 className={`g ${styles.shead}`}>{d.past}</h2>
+          <div className="stack">
+            {past.map((e) => (
+              <Link key={e._id} href={`/${locale}/archive/${e.year}`}
+                    className={`surface ${styles.pastRow}`}>
+                <div className={`g ${styles.pastY}`}>{e.year}</div>
+                <div>
+                  <div className={`g ${styles.pastT}`}>{t(e.title, locale).text}</div>
+                  <div className={styles.pastV}>{t(e.theme, locale).text}</div>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <div className={styles.more}>
+            <B href={`/${locale}/archive`}>{d.allSeasons}</B>
+          </div>
+        </section>
+      )}
     </main>
   )
 }

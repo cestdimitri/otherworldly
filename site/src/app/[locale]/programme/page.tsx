@@ -1,3 +1,5 @@
+import type { Metadata } from 'next'
+import { pageMeta } from '@/lib/meta'
 import { notFound } from 'next/navigation'
 import { q, qWithSource } from '@/sanity/client'
 import { CURRENT_EDITION, EVENTS_BY_EDITION } from '@/sanity/queries'
@@ -17,6 +19,18 @@ import styles from './page.module.css'
  * сезона десятки записей, гонять их через сеть на каждый клик незачем.
  */
 export const revalidate = 60
+
+export async function generateMetadata({
+  params,
+}: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale: raw } = await params
+  const locale = (isLocale(raw) ? raw : 'ru') as Locale
+  return pageMeta({
+    locale, path: '/programme',
+    title: `${locale === 'ru' ? 'Программа' : 'Programme'} — По-ту-сторонний`,
+    description: locale === 'ru' ? 'Фильмы и события сезона по полосам.' : 'Films and events of the season, by strand.',
+  })
+}
 
 export default async function Programme({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params

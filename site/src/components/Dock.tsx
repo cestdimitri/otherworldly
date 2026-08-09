@@ -64,6 +64,12 @@ export function Dock({ locale, pages = [] }: { locale: Locale; pages?: NavPage[]
           onClick={() => setOpen(!open)}
         ><i /><i /><i /></button>
 
+        {/* Текстовый логотип — и метка «где я», и путь назад на главную.
+            Без него со внутренней страницы некуда вернуться. */}
+        <Link href={`/${locale}`} className="mark" aria-label="По-ту-сторонний">
+          <span>По-ту-</span><span>сторонний</span>
+        </Link>
+
         <nav>
           {nav.map(([href, label]) => <Link key={href} href={href}>{label}</Link>)}
         </nav>

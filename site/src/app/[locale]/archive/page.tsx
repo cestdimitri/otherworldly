@@ -1,3 +1,5 @@
+import type { Metadata } from 'next'
+import { pageMeta } from '@/lib/meta'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { q } from '@/sanity/client'
@@ -18,6 +20,18 @@ const ALL_EDITIONS = groq`
 *[_type=="edition"] | order(year desc){
   _id, year, title, theme, startDate, endDate, status, vectors, cities
 }`
+
+export async function generateMetadata({
+  params,
+}: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale: raw } = await params
+  const locale = (isLocale(raw) ? raw : 'ru') as Locale
+  return pageMeta({
+    locale, path: '/archive',
+    title: `${locale === 'ru' ? 'Архив' : 'Archive'} — По-ту-сторонний`,
+    description: locale === 'ru' ? 'Прошедшие сезоны фестиваля.' : 'Past seasons of the festival.',
+  })
+}
 
 export default async function Archive({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params

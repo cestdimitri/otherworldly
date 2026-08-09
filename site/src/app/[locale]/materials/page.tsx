@@ -1,3 +1,5 @@
+import type { Metadata } from 'next'
+import { pageMeta } from '@/lib/meta'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { q } from '@/sanity/client'
@@ -21,6 +23,18 @@ const KIND: Record<Article['kind'], { ru: string; en: string }> = {
   essay: { ru: 'Текст', en: 'Essay' },
   showcase: { ru: 'Шоукейс', en: 'Showcase' },
   chronicle: { ru: 'Хроника', en: 'Chronicle' },
+}
+
+export async function generateMetadata({
+  params,
+}: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale: raw } = await params
+  const locale = (isLocale(raw) ? raw : 'ru') as Locale
+  return pageMeta({
+    locale, path: '/materials',
+    title: `${locale === 'ru' ? 'Материалы' : 'Materials'} — По-ту-сторонний`,
+    description: locale === 'ru' ? 'Тексты, интервью и хроника фестиваля.' : 'Texts, interviews and chronicle.',
+  })
 }
 
 export default async function Materials({ params }: { params: Promise<{ locale: string }> }) {

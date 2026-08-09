@@ -1,42 +1,48 @@
+import Link from 'next/link'
 import { dict, type Locale } from '@/lib/i18n'
+import { ToTop } from './ToTop'
 import styles from './Footer.module.css'
 
 /**
- * Подвал — не меню, а паспортная табличка объекта: пары «ключ / значение»
- * капсом, штрихкод, строка издания. Прижат к правому краю.
+ * Подвал: во всю ширину, без лишнего.
+ * Заменил прежнюю «техническую наклейку» — она отвлекала сильнее, чем сообщала.
  */
 export function Footer({ locale, year }: { locale: Locale; year: number }) {
+  const d = dict[locale]
   const ru = locale === 'ru'
-  const rows: [string, string][] = [
-    [ru ? 'Событие' : 'Event', 'По-ту-сторонний 3.0'],
-    [ru ? 'Сезон' : 'Season', ru ? '03 / «Переход»' : '03 / “Transition”'],
-    [ru ? 'Даты' : 'Dates', `17.09 — 20.09.${year}`],
-    [ru ? 'Площадки' : 'Venues', ru ? 'Горка / Дом Радио' : 'Gorka / Radio House'],
-    [ru ? 'Почта' : 'Email', 'otherworldlyfilmfestival@gmail.com'],
-    [ru ? 'Телеграм' : 'Telegram', '@potustoronnii'],
-    [ru ? 'Билеты' : 'Tickets', 'Timepad'],
+
+  const links: [string, string][] = [
+    [`/${locale}/timetable`, d.timetable],
+    [`/${locale}/programme`, d.programme],
+    [`/${locale}/materials`, d.materials],
+    [`/${locale}/archive`, d.archive],
   ]
 
   return (
-    <footer className={styles.foot}>
-      <div className={styles.plate}>
-        <div className={styles.hd}>
-          <span>Otherworldly</span>
-          <span>{ru ? 'СПб / Ru' : 'SPb / En'}</span>
+    <footer className={styles.f}>
+      <div className={styles.in}>
+        <div className={styles.left}>
+          <Link href={`/${locale}`} className={`g ${styles.mark}`}>По-ту-сторонний</Link>
+          <div className={styles.note}>
+            {ru ? 'Независимый международный кинофестиваль-лаборатория'
+                : 'Independent international film festival-laboratory'}
+            <br />
+            {ru ? 'Санкт-Петербург' : 'St. Petersburg'}
+          </div>
         </div>
-        <div className={styles.rows}>
-          {rows.map(([k, v]) => (
-            <div key={k} className={styles.r}>
-              <span className={styles.k}>{k}</span>
-              <span className={styles.v}>{v}</span>
-            </div>
+
+        <nav className={styles.nav}>
+          {links.map(([href, label]) => (
+            <Link key={href} href={href}>{label}</Link>
           ))}
-        </div>
-        <div className={styles.bar} aria-hidden />
-        <div className={styles.ft}>
-          <span>{ru ? 'Изд. 03' : 'Ed. 03'}</span>
-          <span>© {year}</span>
-        </div>
+        </nav>
+
+        <ToTop label={ru ? 'Наверх' : 'Top'} />
+      </div>
+
+      <div className={styles.base}>
+        <span>© {year} По-ту-сторонний</span>
+        <span>{ru ? 'Все права защищены' : 'All rights reserved'}</span>
       </div>
     </footer>
   )
