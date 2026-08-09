@@ -3,6 +3,7 @@ import { pageMeta } from '@/lib/meta'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { q } from '@/sanity/client'
+import { urlFor } from '@/sanity/image'
 import { ARTICLES } from '@/sanity/queries'
 import { seedArticles } from '@/lib/seed'
 import { dict, isLocale, type Locale } from '@/lib/i18n'
@@ -62,7 +63,12 @@ export default async function Materials({ params }: { params: Promise<{ locale: 
             const href = a.externalUrl ?? `/${locale}/materials/${a.slug}`
             const card = (
               <>
-                <div className={`frame ${styles.cov}`}><div className="ph" /></div>
+                <div className={`frame ${styles.cov}`}>
+                  {urlFor(a.cover, 900)
+                    ? /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={urlFor(a.cover, 900)} alt={a.cover?.alt ?? ''} />
+                    : <div className="ph" />}
+                </div>
                 <div className={styles.bd}>
                   <div className="k">
                     {KIND[a.kind][locale]}

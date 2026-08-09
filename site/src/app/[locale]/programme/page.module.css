@@ -31,3 +31,5 @@
    значило бы сообщить зрителю о нашей модели данных, а не о программе. */
 .flat{cursor:default}
 .flat:hover{background:var(--surface);box-shadow:none}
+
+.still img{display:block;width:100%;height:100%;object-fit:cover;filter:var(--img)}

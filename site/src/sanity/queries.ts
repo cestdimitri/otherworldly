@@ -28,8 +28,9 @@ export const CURRENT_EDITION = groq`
 export const EVENTS_BY_EDITION = groq`
 *[_type=="event" && edition._ref==$editionId] | order(startsAt asc){
   _id, "slug": slug.current, title, strand, startsAt, duration, format, timepadEventId,
+  cover,
   venue->{_id, name, city},
-  films[]->{_id, "slug": slug.current, title, director, year, duration}
+  films[]->{_id, "slug": slug.current, title, director, year, duration, still}
 }`
 
 /** Фильм по адресу. Адрес принадлежит ФИЛЬМУ, а не сеансу: одна работа — одна страница. */

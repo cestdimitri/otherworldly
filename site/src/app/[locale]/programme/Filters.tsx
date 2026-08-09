@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { dict, t, type Locale } from '@/lib/i18n'
 import type { EventItem, Strand } from '@/lib/types'
 import { B } from '@/components/B'
+import { urlFor } from '@/sanity/image'
 import styles from './page.module.css'
 
 type StrandFilter = Strand | 'all'
@@ -82,9 +83,16 @@ export function Filters({ locale, events }: { locale: Locale; events: EventItem[
              * но открывал не то.
              */
             const only = e.films?.length === 1 ? e.films[0] : undefined
+            // Обложка события, а если её не поставили — кадр из фильма
+            const img = urlFor(e.cover, 700) ?? urlFor(only?.still, 700)
             const href = only ? `/${locale}/film/${only.slug}` : undefined
             const inner = (<>
-                <div className={`frame ${styles.still}`}><div className="ph" /></div>
+                <div className={`frame ${styles.still}`}>
+                  {img
+                    ? /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={img} alt={e.cover?.alt ?? only?.still?.alt ?? ''} />
+                    : <div className="ph" />}
+                </div>
                 <div className={styles.body}>
                   <div className="k">{d.strands[e.strand]}</div>
                   <h2 className={`g ${styles.title}`} lang={title.lang}>{title.text}</h2>

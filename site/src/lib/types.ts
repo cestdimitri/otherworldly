@@ -10,7 +10,7 @@ export type Film = {
 export type EventItem = {
   _id: string; slug: string; title: I18n; strand: Strand
   startsAt: string; duration: number; format?: '16' | 'dig'
-  venue?: Venue; films?: Film[]; timepadEventId?: string; coverUrl?: string
+  venue?: Venue; films?: Film[]; timepadEventId?: string; cover?: Img
 }
 export type Edition = {
   _id: string; year: number; title: I18n; theme?: I18n
