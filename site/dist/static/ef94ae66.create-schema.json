@@ -1,0 +1,1492 @@
+[
+  {
+    "options": {
+      "hotspot": true
+    },
+    "fields": [
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "custom"
+              }
+            ]
+          }
+        ],
+        "description": "Что на кадре. Читает экранный диктор и поисковик.",
+        "hidden": "conditional",
+        "name": "alt",
+        "type": "string",
+        "title": "Описание для незрячих"
+      },
+      {
+        "initialValue": false,
+        "description": "Фон или орнамент — диктор его пропустит.",
+        "name": "decorative",
+        "type": "boolean",
+        "title": "Декоративное"
+      },
+      {
+        "description": "Видимая подпись под кадром. Не заменяет описание.",
+        "name": "caption",
+        "type": "string",
+        "title": "Подпись"
+      },
+      {
+        "description": "Кто снял. Ставится, если это не автор всей серии.",
+        "name": "credit",
+        "type": "string",
+        "title": "Автор кадра"
+      }
+    ],
+    "name": "captionedImage",
+    "type": "image",
+    "title": "Изображение"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "year",
+        "type": "number",
+        "title": "Год"
+      },
+      {
+        "options": {
+          "columns": 2
+        },
+        "fields": [
+          {
+            "validation": [
+              {
+                "level": "error",
+                "rules": [
+                  {
+                    "flag": "presence",
+                    "constraint": "required"
+                  }
+                ]
+              }
+            ],
+            "name": "ru",
+            "type": "string",
+            "title": "Русский"
+          },
+          {
+            "name": "en",
+            "type": "string",
+            "title": "English"
+          }
+        ],
+        "name": "title",
+        "type": "object",
+        "title": "Название"
+      },
+      {
+        "options": {
+          "columns": 2
+        },
+        "fields": [
+          {
+            "name": "ru",
+            "type": "string",
+            "title": "Русский"
+          },
+          {
+            "name": "en",
+            "type": "string",
+            "title": "English"
+          }
+        ],
+        "name": "theme",
+        "type": "object",
+        "title": "Тема сезона"
+      },
+      {
+        "description": "Кураторские векторы: «граница», «след», «чувственность».",
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "vectors",
+        "type": "array",
+        "title": "Векторы"
+      },
+      {
+        "fields": [
+          {
+            "rows": 8,
+            "name": "ru",
+            "type": "text",
+            "title": "Русский"
+          },
+          {
+            "rows": 8,
+            "name": "en",
+            "type": "text",
+            "title": "English"
+          }
+        ],
+        "name": "statement",
+        "type": "object",
+        "title": "Кураторский текст"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "startDate",
+        "type": "date",
+        "title": "Начало"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "endDate",
+        "type": "date",
+        "title": "Конец"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Готовится",
+              "value": "upcoming"
+            },
+            {
+              "title": "Текущий",
+              "value": "current"
+            },
+            {
+              "title": "Закрыт (архив)",
+              "value": "archived"
+            }
+          ]
+        },
+        "initialValue": "upcoming",
+        "name": "status",
+        "type": "string",
+        "title": "Состояние"
+      },
+      {
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "cities",
+        "type": "array",
+        "title": "Города"
+      },
+      {
+        "of": [
+          {
+            "to": [
+              {
+                "type": "person"
+              }
+            ],
+            "type": "reference",
+            "title": "Reference to человек"
+          }
+        ],
+        "name": "curators",
+        "type": "array",
+        "title": "Кураторки"
+      }
+    ],
+    "name": "edition",
+    "type": "document",
+    "title": "Сезон"
+  },
+  {
+    "fields": [
+      {
+        "options": {
+          "columns": 2
+        },
+        "fields": [
+          {
+            "validation": [
+              {
+                "level": "error",
+                "rules": [
+                  {
+                    "flag": "presence",
+                    "constraint": "required"
+                  }
+                ]
+              }
+            ],
+            "name": "ru",
+            "type": "string",
+            "title": "Русский"
+          },
+          {
+            "name": "en",
+            "type": "string",
+            "title": "English"
+          }
+        ],
+        "name": "title",
+        "type": "object",
+        "title": "Название"
+      },
+      {
+        "options": {
+          "source": "title.ru",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "slug",
+        "type": "slug",
+        "title": "Адрес"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "to": [
+          {
+            "type": "edition"
+          }
+        ],
+        "name": "edition",
+        "type": "reference",
+        "title": "Сезон"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Фестиваль",
+              "value": "fest"
+            },
+            {
+              "title": "Лаборатория",
+              "value": "lab"
+            },
+            {
+              "title": "Спецпрограмма",
+              "value": "spec"
+            },
+            {
+              "title": "Эхо в других городах",
+              "value": "echo"
+            }
+          ]
+        },
+        "initialValue": "fest",
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "fest",
+                  "lab",
+                  "spec",
+                  "echo"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "description": "На сайте полоса обозначается ТОЛЬКО подписью — ни цветом, ни значком (D-090).",
+        "name": "strand",
+        "type": "string",
+        "title": "Полоса"
+      },
+      {
+        "options": {
+          "dateFormat": "DD.MM.YYYY",
+          "timeFormat": "HH:mm"
+        },
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "startsAt",
+        "type": "datetime",
+        "title": "Начало"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 1
+              }
+            ]
+          }
+        ],
+        "description": "Определяет высоту блока в сетке расписания — строка равна 30 минутам.",
+        "name": "duration",
+        "type": "number",
+        "title": "Длительность, мин"
+      },
+      {
+        "to": [
+          {
+            "type": "venue"
+          }
+        ],
+        "name": "venue",
+        "type": "reference",
+        "title": "Площадка"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "16 мм",
+              "value": "16"
+            },
+            {
+              "title": "Цифра",
+              "value": "dig"
+            }
+          ]
+        },
+        "initialValue": "dig",
+        "name": "format",
+        "type": "string",
+        "title": "Носитель"
+      },
+      {
+        "of": [
+          {
+            "to": [
+              {
+                "type": "film"
+              }
+            ],
+            "type": "reference",
+            "title": "Reference to фильм"
+          }
+        ],
+        "name": "films",
+        "type": "array",
+        "title": "Фильмы"
+      },
+      {
+        "fields": [
+          {
+            "rows": 4,
+            "name": "ru",
+            "type": "text",
+            "title": "Русский"
+          },
+          {
+            "rows": 4,
+            "name": "en",
+            "type": "text",
+            "title": "English"
+          }
+        ],
+        "name": "description",
+        "type": "object",
+        "title": "Описание"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "name": "cover",
+        "type": "captionedImage",
+        "title": "Обложка"
+      },
+      {
+        "description": "Пусто — кнопка билета покажет «скоро в продаже» вместо мёртвой ссылки (D-010).",
+        "name": "timepadEventId",
+        "type": "string",
+        "title": "ID события в Timepad"
+      }
+    ],
+    "name": "event",
+    "type": "document",
+    "title": "Событие"
+  },
+  {
+    "fields": [
+      {
+        "options": {
+          "columns": 2
+        },
+        "fields": [
+          {
+            "validation": [
+              {
+                "level": "error",
+                "rules": [
+                  {
+                    "flag": "presence",
+                    "constraint": "required"
+                  }
+                ]
+              }
+            ],
+            "name": "ru",
+            "type": "string",
+            "title": "Русский"
+          },
+          {
+            "name": "en",
+            "type": "string",
+            "title": "English"
+          }
+        ],
+        "name": "title",
+        "type": "object",
+        "title": "Название"
+      },
+      {
+        "name": "originalTitle",
+        "type": "string",
+        "title": "Оригинальное название"
+      },
+      {
+        "options": {
+          "source": "title.ru",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "description": "Один слаг на оба языка (D-004): ссылку можно переслать кому угодно.",
+        "name": "slug",
+        "type": "slug",
+        "title": "Адрес"
+      },
+      {
+        "name": "director",
+        "type": "string",
+        "title": "Режиссёр"
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "title": "Страна"
+      },
+      {
+        "name": "year",
+        "type": "number",
+        "title": "Год"
+      },
+      {
+        "name": "duration",
+        "type": "number",
+        "title": "Хронометраж, мин"
+      },
+      {
+        "fields": [
+          {
+            "rows": 5,
+            "name": "ru",
+            "type": "text",
+            "title": "Русский"
+          },
+          {
+            "rows": 5,
+            "name": "en",
+            "type": "text",
+            "title": "English"
+          }
+        ],
+        "name": "synopsis",
+        "type": "object",
+        "title": "Синопсис"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "name": "still",
+        "type": "captionedImage",
+        "title": "Кадр"
+      }
+    ],
+    "name": "film",
+    "type": "document",
+    "title": "Фильм"
+  },
+  {
+    "fields": [
+      {
+        "options": {
+          "columns": 2
+        },
+        "fields": [
+          {
+            "validation": [
+              {
+                "level": "error",
+                "rules": [
+                  {
+                    "flag": "presence",
+                    "constraint": "required"
+                  }
+                ]
+              }
+            ],
+            "name": "ru",
+            "type": "string",
+            "title": "Русский"
+          },
+          {
+            "name": "en",
+            "type": "string",
+            "title": "English"
+          }
+        ],
+        "name": "name",
+        "type": "object",
+        "title": "Название"
+      },
+      {
+        "initialValue": "Санкт-Петербург",
+        "name": "city",
+        "type": "string",
+        "title": "Город"
+      },
+      {
+        "name": "address",
+        "type": "string",
+        "title": "Адрес"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "name": "mapLink",
+        "type": "url",
+        "title": "Ссылка на карту"
+      }
+    ],
+    "name": "venue",
+    "type": "document",
+    "title": "Площадка"
+  },
+  {
+    "fields": [
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Русский",
+              "value": "ru"
+            },
+            {
+              "title": "English",
+              "value": "en"
+            }
+          ]
+        },
+        "initialValue": "ru",
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "ru",
+                  "en"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "language",
+        "type": "string",
+        "title": "Язык"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "title",
+        "type": "string",
+        "title": "Заголовок"
+      },
+      {
+        "options": {
+          "source": "title",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "slug",
+        "type": "slug",
+        "title": "Адрес"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Интервью",
+              "value": "interview"
+            },
+            {
+              "title": "Текст",
+              "value": "essay"
+            },
+            {
+              "title": "Шоукейс",
+              "value": "showcase"
+            },
+            {
+              "title": "Хроника",
+              "value": "chronicle"
+            }
+          ]
+        },
+        "initialValue": "essay",
+        "name": "kind",
+        "type": "string",
+        "title": "Тип"
+      },
+      {
+        "rows": 2,
+        "name": "dek",
+        "type": "text",
+        "title": "Подзаголовок"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "description": "Обложка обязательна: карточки материалов на сайте фотографические.",
+        "name": "cover",
+        "type": "captionedImage",
+        "title": "Обложка"
+      },
+      {
+        "to": [
+          {
+            "type": "person"
+          }
+        ],
+        "name": "author",
+        "type": "reference",
+        "title": "Автор"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "publishedAt",
+        "type": "datetime",
+        "title": "Дата публикации"
+      },
+      {
+        "of": [
+          {
+            "lists": [
+              {
+                "value": "bullet",
+                "title": "Bulleted list"
+              },
+              {
+                "value": "number",
+                "title": "Numbered list"
+              }
+            ],
+            "marks": {
+              "annotations": [
+                {
+                  "i18nTitleKey": "inputs.portable-text.annotation.link",
+                  "options": {
+                    "modal": {
+                      "type": "popover"
+                    }
+                  },
+                  "fields": [
+                    {
+                      "validation": [
+                        {
+                          "level": "error",
+                          "rules": [
+                            {
+                              "flag": "uri",
+                              "constraint": {
+                                "options": {
+                                  "scheme": [
+                                    "/^http$/",
+                                    "/^https$/",
+                                    "/^tel$/",
+                                    "/^mailto$/"
+                                  ],
+                                  "allowRelative": true,
+                                  "relativeOnly": false,
+                                  "allowCredentials": false
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ],
+                      "description": "A valid web, email, phone, or relative link.",
+                      "name": "href",
+                      "type": "url",
+                      "title": "Link"
+                    }
+                  ],
+                  "name": "link",
+                  "type": "object"
+                }
+              ],
+              "decorators": [
+                {
+                  "value": "strong",
+                  "title": "Strong"
+                },
+                {
+                  "value": "em",
+                  "title": "Italic"
+                },
+                {
+                  "value": "code",
+                  "title": "Code"
+                },
+                {
+                  "value": "underline",
+                  "title": "Underline"
+                },
+                {
+                  "value": "strike-through",
+                  "title": "Strike"
+                }
+              ]
+            },
+            "of": [],
+            "styles": [
+              {
+                "value": "normal",
+                "title": "Normal"
+              },
+              {
+                "value": "h1",
+                "title": "Heading 1"
+              },
+              {
+                "value": "h2",
+                "title": "Heading 2"
+              },
+              {
+                "value": "h3",
+                "title": "Heading 3"
+              },
+              {
+                "value": "h4",
+                "title": "Heading 4"
+              },
+              {
+                "value": "h5",
+                "title": "Heading 5"
+              },
+              {
+                "value": "h6",
+                "title": "Heading 6"
+              },
+              {
+                "value": "blockquote",
+                "title": "Quote"
+              }
+            ],
+            "type": "block"
+          },
+          {
+            "options": {
+              "hotspot": true
+            },
+            "type": "captionedImage",
+            "title": "Изображение"
+          }
+        ],
+        "name": "body",
+        "type": "array",
+        "title": "Текст"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "description": "Если материал опубликован не у нас — карточка поведёт наружу.",
+        "name": "externalUrl",
+        "type": "url",
+        "title": "Внешняя ссылка"
+      },
+      {
+        "to": [
+          {
+            "type": "article"
+          }
+        ],
+        "name": "translationOf",
+        "type": "reference",
+        "title": "Перевод материала"
+      }
+    ],
+    "name": "article",
+    "type": "document",
+    "title": "Материал"
+  },
+  {
+    "fields": [
+      {
+        "options": {
+          "columns": 2
+        },
+        "fields": [
+          {
+            "validation": [
+              {
+                "level": "error",
+                "rules": [
+                  {
+                    "flag": "presence",
+                    "constraint": "required"
+                  }
+                ]
+              }
+            ],
+            "name": "ru",
+            "type": "string",
+            "title": "Русский"
+          },
+          {
+            "name": "en",
+            "type": "string",
+            "title": "English"
+          }
+        ],
+        "name": "title",
+        "type": "object",
+        "title": "Название"
+      },
+      {
+        "to": [
+          {
+            "type": "edition"
+          }
+        ],
+        "name": "edition",
+        "type": "reference",
+        "title": "Сезон"
+      },
+      {
+        "to": [
+          {
+            "type": "person"
+          }
+        ],
+        "name": "photographer",
+        "type": "reference",
+        "title": "Съёмка"
+      },
+      {
+        "of": [
+          {
+            "options": {
+              "hotspot": true
+            },
+            "type": "captionedImage",
+            "title": "Изображение"
+          }
+        ],
+        "name": "images",
+        "type": "array",
+        "title": "Кадры"
+      }
+    ],
+    "name": "gallery",
+    "type": "document",
+    "title": "Галерея"
+  },
+  {
+    "fields": [
+      {
+        "options": {
+          "columns": 2
+        },
+        "fields": [
+          {
+            "validation": [
+              {
+                "level": "error",
+                "rules": [
+                  {
+                    "flag": "presence",
+                    "constraint": "required"
+                  }
+                ]
+              }
+            ],
+            "name": "ru",
+            "type": "string",
+            "title": "Русский"
+          },
+          {
+            "name": "en",
+            "type": "string",
+            "title": "English"
+          }
+        ],
+        "name": "name",
+        "type": "object",
+        "title": "Имя"
+      },
+      {
+        "options": {
+          "columns": 2
+        },
+        "fields": [
+          {
+            "name": "ru",
+            "type": "string",
+            "title": "Русский"
+          },
+          {
+            "name": "en",
+            "type": "string",
+            "title": "English"
+          }
+        ],
+        "name": "role",
+        "type": "object",
+        "title": "Роль"
+      },
+      {
+        "fields": [
+          {
+            "rows": 3,
+            "name": "ru",
+            "type": "text",
+            "title": "Русский"
+          },
+          {
+            "rows": 3,
+            "name": "en",
+            "type": "text",
+            "title": "English"
+          }
+        ],
+        "name": "bio",
+        "type": "object",
+        "title": "Биография"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "description": "Кроп задаётся точкой фокуса — сайт обрежет сам под 4:5.",
+        "name": "portrait",
+        "type": "captionedImage",
+        "title": "Портрет"
+      },
+      {
+        "of": [
+          {
+            "validation": [
+              {
+                "level": "error",
+                "rules": [
+                  {
+                    "flag": "uri",
+                    "constraint": {
+                      "options": {
+                        "scheme": [
+                          "/^http$/",
+                          "/^https$/"
+                        ],
+                        "allowRelative": false,
+                        "relativeOnly": false,
+                        "allowCredentials": false
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "type": "url"
+          }
+        ],
+        "name": "links",
+        "type": "array",
+        "title": "Ссылки"
+      }
+    ],
+    "name": "person",
+    "type": "document",
+    "title": "Человек"
+  },
+  {
+    "fields": [
+      {
+        "options": {
+          "columns": 2
+        },
+        "fields": [
+          {
+            "validation": [
+              {
+                "level": "error",
+                "rules": [
+                  {
+                    "flag": "presence",
+                    "constraint": "required"
+                  }
+                ]
+              }
+            ],
+            "name": "ru",
+            "type": "string",
+            "title": "Русский"
+          },
+          {
+            "name": "en",
+            "type": "string",
+            "title": "English"
+          }
+        ],
+        "name": "title",
+        "type": "object",
+        "title": "Заголовок"
+      },
+      {
+        "options": {
+          "source": "title.ru"
+        },
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "description": "Латиницей. Станет адресом: /ru/адрес",
+        "name": "slug",
+        "type": "slug",
+        "title": "Адрес"
+      },
+      {
+        "fields": [
+          {
+            "rows": 3,
+            "name": "ru",
+            "type": "text",
+            "title": "Русский"
+          },
+          {
+            "rows": 3,
+            "name": "en",
+            "type": "text",
+            "title": "English"
+          }
+        ],
+        "name": "lead",
+        "type": "object",
+        "title": "Лид"
+      },
+      {
+        "of": [
+          {
+            "lists": [
+              {
+                "value": "bullet",
+                "title": "Bulleted list"
+              },
+              {
+                "value": "number",
+                "title": "Numbered list"
+              }
+            ],
+            "marks": {
+              "annotations": [
+                {
+                  "i18nTitleKey": "inputs.portable-text.annotation.link",
+                  "options": {
+                    "modal": {
+                      "type": "popover"
+                    }
+                  },
+                  "fields": [
+                    {
+                      "validation": [
+                        {
+                          "level": "error",
+                          "rules": [
+                            {
+                              "flag": "uri",
+                              "constraint": {
+                                "options": {
+                                  "scheme": [
+                                    "/^http$/",
+                                    "/^https$/",
+                                    "/^tel$/",
+                                    "/^mailto$/"
+                                  ],
+                                  "allowRelative": true,
+                                  "relativeOnly": false,
+                                  "allowCredentials": false
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ],
+                      "description": "A valid web, email, phone, or relative link.",
+                      "name": "href",
+                      "type": "url",
+                      "title": "Link"
+                    }
+                  ],
+                  "name": "link",
+                  "type": "object"
+                }
+              ],
+              "decorators": [
+                {
+                  "value": "strong",
+                  "title": "Strong"
+                },
+                {
+                  "value": "em",
+                  "title": "Italic"
+                },
+                {
+                  "value": "code",
+                  "title": "Code"
+                },
+                {
+                  "value": "underline",
+                  "title": "Underline"
+                },
+                {
+                  "value": "strike-through",
+                  "title": "Strike"
+                }
+              ]
+            },
+            "of": [],
+            "styles": [
+              {
+                "value": "normal",
+                "title": "Normal"
+              },
+              {
+                "value": "h1",
+                "title": "Heading 1"
+              },
+              {
+                "value": "h2",
+                "title": "Heading 2"
+              },
+              {
+                "value": "h3",
+                "title": "Heading 3"
+              },
+              {
+                "value": "h4",
+                "title": "Heading 4"
+              },
+              {
+                "value": "h5",
+                "title": "Heading 5"
+              },
+              {
+                "value": "h6",
+                "title": "Heading 6"
+              },
+              {
+                "value": "blockquote",
+                "title": "Quote"
+              }
+            ],
+            "type": "block"
+          },
+          {
+            "options": {
+              "hotspot": true
+            },
+            "type": "captionedImage",
+            "title": "Изображение"
+          }
+        ],
+        "name": "blocks",
+        "type": "array",
+        "title": "Текст"
+      },
+      {
+        "initialValue": false,
+        "name": "inNav",
+        "type": "boolean",
+        "title": "Показывать в меню"
+      },
+      {
+        "description": "Меньше — левее. Пункты сайта занимают 10–40.",
+        "hidden": "conditional",
+        "name": "navOrder",
+        "type": "number",
+        "title": "Порядок в меню"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "name": "cover",
+        "type": "captionedImage",
+        "title": "Обложка"
+      }
+    ],
+    "name": "page",
+    "type": "document",
+    "title": "Страница"
+  },
+  {
+    "fields": [
+      {
+        "options": {
+          "columns": 2
+        },
+        "fields": [
+          {
+            "name": "ru",
+            "type": "string",
+            "title": "Русский"
+          },
+          {
+            "name": "en",
+            "type": "string",
+            "title": "English"
+          }
+        ],
+        "name": "seasonLine",
+        "type": "object",
+        "title": "Строка сезона"
+      },
+      {
+        "description": "От дат этого сезона зависит вся лента на главной.",
+        "to": [
+          {
+            "type": "edition"
+          }
+        ],
+        "name": "currentEdition",
+        "type": "reference",
+        "title": "Текущий сезон"
+      },
+      {
+        "initialValue": false,
+        "name": "openCallOpen",
+        "type": "boolean",
+        "title": "Опен колл открыт"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "name": "openCallUrl",
+        "type": "url",
+        "title": "Ссылка на форму заявки"
+      },
+      {
+        "name": "openCallDeadline",
+        "type": "date",
+        "title": "Дедлайн опен колла"
+      },
+      {
+        "name": "email",
+        "type": "string",
+        "title": "Почта"
+      },
+      {
+        "name": "telegram",
+        "type": "string",
+        "title": "Телеграм"
+      },
+      {
+        "name": "instagram",
+        "type": "string",
+        "title": "Инстаграм"
+      }
+    ],
+    "name": "siteSettings",
+    "type": "document",
+    "title": "Настройки сайта"
+  }
+]

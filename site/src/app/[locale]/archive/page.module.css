@@ -16,3 +16,5 @@
   .wrap{padding:110px 20px 90px}
   .ed{grid-template-columns:1fr;gap:14px;padding:24px 20px}
 }
+
+.empty{margin-top:40px;font-size:14px;color:var(--dimmer);max-width:44ch;line-height:1.7}

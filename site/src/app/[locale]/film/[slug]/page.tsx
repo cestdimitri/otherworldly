@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { q } from '@/sanity/client'
+import { q, qWithSource } from '@/sanity/client'
 import { FILM_BY_SLUG, FILM_SLUGS, SCREENINGS_OF_FILM } from '@/sanity/queries'
 import { seedFilms, seedScreenings } from '@/lib/seed'
 import { dict, isLocale, locales, t, type Locale } from '@/lib/i18n'
@@ -36,11 +36,13 @@ export async function generateStaticParams() {
 
 async function get(slug: string) {
   const fb = seedFilms.find((f) => f.slug === slug) ?? null
-  const film = await q<Film | null>(FILM_BY_SLUG, { slug }, fb)
+  // Фильм и его сеансы — из одного источника: у демо-фильма идентификатор,
+  // которого нет в базе, и биография работы оказалась бы пустой.
+  const { data: film, fromSeed } = await qWithSource<Film | null>(FILM_BY_SLUG, { slug }, fb)
   if (!film) return { film: null, screenings: [] as Screening[] }
-  const screenings = await q<Screening[]>(
-    SCREENINGS_OF_FILM, { filmId: film._id }, seedScreenings[slug] ?? [],
-  )
+  const screenings = fromSeed
+    ? seedScreenings[slug] ?? []
+    : await q<Screening[]>(SCREENINGS_OF_FILM, { filmId: film._id }, [])
   return { film, screenings }
 }
 

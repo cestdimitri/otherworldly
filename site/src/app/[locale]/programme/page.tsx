@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { q } from '@/sanity/client'
+import { q, qWithSource } from '@/sanity/client'
 import { CURRENT_EDITION, EVENTS_BY_EDITION } from '@/sanity/queries'
 import { seedEdition, seedEvents } from '@/lib/seed'
 import { dict, isLocale, t, type Locale } from '@/lib/i18n'
@@ -24,8 +24,14 @@ export default async function Programme({ params }: { params: Promise<{ locale: 
   const locale = raw as Locale
   const d = dict[locale]
 
-  const edition = await q<Edition>(CURRENT_EDITION, {}, seedEdition)
-  const events = await q<EventItem[]>(EVENTS_BY_EDITION, { editionId: edition._id }, seedEvents)
+  // Сезон и его события — из одного источника. Смешивать нельзя: у демо-сезона
+  // идентификатор, которого нет в базе, и запрос вернул бы пустую программу.
+  const { data: edition, fromSeed } = await qWithSource<Edition>(
+    CURRENT_EDITION, {}, seedEdition,
+  )
+  const events = fromSeed
+    ? seedEvents
+    : await q<EventItem[]>(EVENTS_BY_EDITION, { editionId: edition._id }, seedEvents)
 
   return (
     <main className={styles.wrap}>

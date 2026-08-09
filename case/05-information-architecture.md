@@ -193,7 +193,7 @@ so the flow can be two.
 The FAQ must sit *above* the form, not below it — most abandonment happens at "am I eligible?"
 
 **A curator publishes an event**
-`/studio → События → Создать → fill RU + EN → attach film, venue, date → paste Timepad ID → Publish`
+`otherworldly.sanity.studio → События → Создать → fill RU + EN → attach film, venue, date → paste Timepad ID → Publish`
 Live in seconds. No rebuild. Target: under 10 minutes for someone who has done it twice.
 
 ---
@@ -220,7 +220,7 @@ pages stop changing. That's what makes it an archive.
 |---|---|
 | RU / EN | Sub-path routing `/ru` `/en`, field-level translation, equivalence-preserving switcher, hreflang |
 | ~~Dark only~~ → Two worlds | Both palettes as custom properties on `[data-world]`; world set server-side from `edition` dates + cookie; crossing control in the header — `09` |
-| CMS | Sanity Studio at `/studio`; nine document types; Russian field labels |
+| CMS | Sanity Studio at `otherworldly.sanity.studio` (moved off `/studio`, D-110); nine document types; Russian field labels |
 | Multipage | Nine top-level sections, real routes, deep-linkable, filter state in URL |
 | Timepad | `TicketButton` component on event / programme / timetable / tickets pages |
 | Timetable | `/festival/2026/timetable`, generated from event data, three responsive treatments |

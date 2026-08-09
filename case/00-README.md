@@ -20,7 +20,7 @@ international film festival-laboratory based in St. Petersburg.
 | 04 | [CMS & hosting architecture](04-cms-architecture.md) | Next.js + Sanity, cost, bilingual mechanism, content model, Timepad, deployment |
 | 05 | [Information architecture](05-information-architecture.md) | Sitemap, URL scheme, navigation, page models, user flows, traceability |
 | 06 | [Wireframes](06-wireframes/) | Three interactive low-fi directions — **open `index.html`** |
-| 07 | [Process log](07-process-log.md) | Dated sessions, **109 numbered decisions**, open items |
+| 07 | [Process log](07-process-log.md) | Dated sessions, **112 numbered decisions**, open items |
 | 08 | [Visual audit](08-visual-audit.md) | What the current site gets right, what's broken, measured before-state, rendering defects |
 | 09 | [Two worlds](09-two-worlds.md) | ⚠️ **Superseded 3 Aug.** The dual-register system, designed and built, then cut. Kept as the record of a rejected direction |
 | 10 | [Visual direction](10-visual-direction.md) | References decoded, 11 revisions, the palette and its corrections |
@@ -28,7 +28,7 @@ international film festival-laboratory based in St. Petersburg.
 | 12 | [Homepage](12-homepage/) | **Open `index.html`.** The projection concept — ЗАЛ / ЛУЧ |
 | 13 | [Type chooser](13-type/) | Seven display faces tested on the real material — Golos Text chosen |
 | 14 | [Inner pages](14-pages/) | **Five pages** — timetable, programme, film, article, archive edition |
-| 15 | [`../site/`](../site/README.md) | **The build.** Next.js 16 + Sanity, embedded Studio, nine schemas, i18n |
+| 15 | [`../site/`](../site/README.md) | **The build.** Next.js 16 + Sanity, nine schemas, i18n. Deployed |
 
 ---
 
@@ -38,7 +38,7 @@ international film festival-laboratory based in St. Petersburg.
 |---|---|
 | RU / EN | Sub-path routing `/ru` `/en`, field-level translation, RU fallback, equivalence-preserving switcher — `04`, `05` |
 | **Dark only** | Held. No theme toggle anywhere. The site is the auditorium — dark is the condition of watching film, not a preference. A two-world system was built and then cut (`09`) — `10` |
-| CMS | Sanity Studio embedded at `/studio`, 9 document types, Russian field labels. New sections appear without a build via the flexible `[slug]` route, and curators order the menu themselves — `04` |
+| CMS | Sanity Studio on `otherworldly.sanity.studio` — embedding it at `/studio` broke the 3 MB Worker limit (D-110). 9 document types, Russian field labels. New sections appear without a build via the flexible `[slug]` route, and curators order the menu themselves — `04` |
 | Multipage | 9 top-level sections, real routes, filter state in URL — `05` |
 | Timepad | Popup-mode widget behind our own `TicketButton` component — `04` |
 | Timetable | Generated from event data, three responsive treatments — `04`, `05` |
@@ -55,7 +55,7 @@ Display face: **Golos Text**. Palette: monochrome, ЗАЛ primary.
 visual direction, and the full page set — homepage plus five inner pages.
 
 **Built and passing** — `../site/`. `next build` green, 46 pages prerendered.
-Nine Sanity schemas, embedded Studio at `/studio`, RU/EN routing with real hreflang and
+Nine Sanity schemas, Studio on Sanity hosting, RU/EN routing with real hreflang and
 one sitemap for both languages, tokens declared once, every page wired to queries with a
 seed-data fallback so the repo runs without any keys. Article bodies render from Portable
 Text; alt text is required by the schema rather than requested of the editors.
@@ -73,9 +73,10 @@ festival seen the design yet?
 minutes. No longer urgent — Tilda stays live in parallel rather than being replaced — but
 still needed for the case's before/after spread.
 
-**Deploying** — [`../DEPLOY.md`](../DEPLOY.md): Sanity project, GitHub repo, Cloudflare
-Workers, and what to tell the client is still placeholder. GitHub Pages was ruled out —
-static hosting cannot run the Studio or ISR (D-107).
+**Deployed** — site on Cloudflare Workers, Studio on Sanity hosting.
+[`../DEPLOY.md`](../DEPLOY.md) is the working procedure, verified end to end against the
+real CLI rather than from memory. GitHub Pages was ruled out (D-107); the embedded Studio
+was ruled out by the 3 MB Worker limit (D-110).
 
 **Case assembly waits for launch** (decided 7 Aug). Bilingual Markdown for a portfolio
 builder, written when there are real photographs, real metrics and a client quote to put
@@ -111,7 +112,7 @@ otherworldly/
     ├── 04-cms-architecture.md          Next.js + Sanity, Timepad, content model
     ├── 05-information-architecture.md  sitemap, URLs, flows
     ├── 06-wireframes/                  A / B / C — open index.html
-    ├── 07-process-log.md               sessions, 109 decisions, open items
+    ├── 07-process-log.md               sessions, 112 decisions, open items
     ├── 08-visual-audit.md              current site measured, defects found
     ├── 09-two-worlds.md                ⚠ superseded — kept as a rejected system
     ├── 10-visual-direction.md          references decoded, 11 revisions
@@ -127,11 +128,10 @@ otherworldly/
 └── site/                          the build
     ├── src/app/globals.css        ★ tokens — declared once, not seven times
     ├── src/app/[locale]/          homepage (season spine) + timetable
-    ├── src/app/studio/            embedded Sanity Studio
     ├── src/components/B.tsx       ★ the one interactive primitive
     ├── src/sanity/schemas/        nine document types
     └── src/lib/seed.ts            demo data — repo runs without Sanity keys
     
     routes: / · /[locale] · timetable · programme · film/[slug]
-            materials · materials/[slug] · archive · archive/[year] · /studio
+            materials · materials/[slug] · archive · archive/[year] · [slug]
 ```

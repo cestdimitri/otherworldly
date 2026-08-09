@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { q } from '@/sanity/client'
 import { groq } from 'next-sanity'
-import { seedEdition } from '@/lib/seed'
+import { seedArchive } from '@/lib/seed'
 import { dict, isLocale, t, type Locale } from '@/lib/i18n'
 import type { Edition } from '@/lib/types'
 import styles from './page.module.css'
@@ -19,18 +19,6 @@ const ALL_EDITIONS = groq`
   _id, year, title, theme, startDate, endDate, status, vectors, cities
 }`
 
-const seedArchive: Edition[] = [
-  seedEdition,
-  { _id: 's-2025', year: 2025, title: { ru: 'Otherworldly 2.0', en: 'Otherworldly 2.0' },
-    theme: { ru: 'Нейрометаморфозы, граница, след', en: 'Neurometamorphoses, border, trace' },
-    startDate: '2025-09-12', endDate: '2025-09-14', status: 'archived',
-    cities: ['Санкт-Петербург', 'Москва', 'Выборг', 'Калининград'] },
-  { _id: 's-2024', year: 2024, title: { ru: 'Otherworldly 1.0', en: 'Otherworldly 1.0' },
-    theme: { ru: 'Призрачность образа, хонтология', en: 'Spectrality of the image, hauntology' },
-    startDate: '2024-11-15', endDate: '2024-11-17', status: 'archived',
-    cities: ['Санкт-Петербург', 'Москва', 'Калининград'] },
-]
-
 export default async function Archive({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params
   if (!isLocale(raw)) notFound()
@@ -42,6 +30,14 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
   return (
     <main className={styles.wrap} data-mode="archive">
       <h1 className={`g ${styles.h1}`}>{d.archive}</h1>
+      {editions.length === 0 && (
+        <p className={styles.empty}>
+          {locale === 'ru'
+            ? 'Сезонов пока нет. Они появятся, когда их заведут в админке.'
+            : 'No seasons yet. They appear once they are added in the studio.'}
+        </p>
+      )}
+
       <div className="stack" style={{ marginTop: 44 }}>
         {editions.map((e) => {
           const live = e.status === 'current'

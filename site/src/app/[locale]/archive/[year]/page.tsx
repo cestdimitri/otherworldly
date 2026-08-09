@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
-import { q } from '@/sanity/client'
+import { q, qWithSource } from '@/sanity/client'
 import { groq } from 'next-sanity'
-import { seedEdition, seedEvents } from '@/lib/seed'
+import { seedArchive, seedEvents } from '@/lib/seed'
 import { dict, isLocale, locales, t, type Locale } from '@/lib/i18n'
 import type { Edition, EventItem } from '@/lib/types'
 import styles from './page.module.css'
@@ -17,9 +17,13 @@ import styles from './page.module.css'
  */
 export const revalidate = 300
 
+const ALL_YEARS = groq`*[_type=="edition" && defined(year)]{ year }`
+
 export async function generateStaticParams() {
-  const years = [2026, 2025, 2024]
-  return locales.flatMap((locale) => years.map((y) => ({ locale, year: String(y) })))
+  const rows = await q<{ year: number }[]>(
+    ALL_YEARS, {}, seedArchive.map((e) => ({ year: e.year })),
+  )
+  return locales.flatMap((locale) => rows.map((r) => ({ locale, year: String(r.year) })))
 }
 
 const EDITION_BY_YEAR = groq`
@@ -35,13 +39,21 @@ export default async function EditionPage({
   const locale = raw as Locale
   const d = dict[locale]
 
-  const edition = await q<Edition | null>(EDITION_BY_YEAR, { year: Number(year) }, seedEdition)
+  // Откат ищет ЗАПРОШЕННЫЙ год, а не отдаёт текущий сезон вслепую:
+  // иначе /archive/2025 в пустой базе показал бы содержимое 2026-го,
+  // то есть соврал бы уверенно и незаметно.
+  const { data: edition, fromSeed } = await qWithSource<Edition | null>(
+    EDITION_BY_YEAR, { year: Number(year) },
+    seedArchive.find((e) => e.year === Number(year)) ?? null,
+  )
   if (!edition) notFound()
 
-  const events = await q<EventItem[]>(
-    groq`*[_type=="event" && edition._ref==$id] | order(startsAt asc){
-      _id, slug, title, strand, startsAt, duration, format, venue->{name}
-    }`, { id: edition._id }, seedEvents)
+  const events = fromSeed
+    ? seedEvents
+    : await q<EventItem[]>(
+        groq`*[_type=="event" && edition._ref==$id] | order(startsAt asc){
+          _id, slug, title, strand, startsAt, duration, format, venue->{name}
+        }`, { id: edition._id }, seedEvents)
 
   const closed = edition.status === 'archived'
   const title = t(edition.title, locale)

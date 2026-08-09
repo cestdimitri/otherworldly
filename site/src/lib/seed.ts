@@ -138,3 +138,20 @@ export const seedPages: Page[] = [
     },
   },
 ]
+
+/**
+ * Все сезоны. Нужны и списку архива, и странице конкретного года,
+ * поэтому живут здесь, а не внутри одной из страниц.
+ */
+export const seedArchive: Edition[] = [
+  seedEdition,
+  { _id: 's-2025', year: 2025, title: { ru: 'Otherworldly 2.0', en: 'Otherworldly 2.0' },
+    theme: { ru: 'Нейрометаморфозы, граница, след', en: 'Neurometamorphoses, border, trace' },
+    startDate: '2025-09-12', endDate: '2025-09-14', status: 'archived',
+    cities: ['Санкт-Петербург', 'Москва', 'Выборг', 'Калининград'] },
+  { _id: 's-2024', year: 2024, title: { ru: 'Otherworldly 1.0', en: 'Otherworldly 1.0' },
+    theme: { ru: 'Призрачность образа, хонтология', en: 'Spectrality of the image, hauntology' },
+    startDate: '2024-11-15', endDate: '2024-11-17', status: 'archived',
+    cities: ['Санкт-Петербург', 'Москва', 'Калининград'] },
+]
+

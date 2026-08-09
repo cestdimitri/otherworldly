@@ -7,9 +7,17 @@ scale. There are two genuinely different ways to do it, and the choice matters.
 
 - **Coupled** — the CMS lives *inside* the website codebase, one repo, one deploy, one domain.
   The editing interface is a route on the site, e.g. `otherworldly.ru/studio`.
+  (This is the option we chose and then had to abandon — see the note below.)
 - **Decoupled** — the CMS is a separate hosted service; the website reads from it over an API.
 
-We're going **coupled-embedded**: Sanity Studio mounted inside the Next.js app at `/studio`,
+> ⚠️ **Reversed 8 August.** The embedded Studio does not fit inside a Cloudflare Worker:
+> the cap is 3 MB and the build came to 18.5 MB, because the `sanity` package is 22 MB on
+> its own. The paid tier's 10 MB does not fit either, so this was never about money.
+> The Studio now lives on Sanity's own hosting at `otherworldly.sanity.studio`.
+> Everything below about the content model, the bilingual mechanism and Timepad still
+> holds — only the location of the editing interface changed. See D-110.
+
+We *were* going **coupled-embedded**: Sanity Studio mounted inside the Next.js app at `/studio`,
 so you deploy one thing, but the content *data* lives in Sanity's hosted datastore, so you never
 run a database.
 
@@ -27,7 +35,7 @@ festival's own domain.
 │                                                             │
 │   Next.js 15 App Router                                     │
 │   ├── /[locale]/...        public site (RU / EN)            │
-│   └── /studio              Sanity Studio (embedded CMS UI)  │
+│   (Studio moved out — see the note at the top)             │
 └──────────────┬──────────────────────────────────────────────┘
                │ GROQ queries over HTTPS
                ▼
@@ -76,7 +84,7 @@ paid threshold is the Growth plan at ~$15/seat/mo, which this project should not
 
 ## How editing actually works for the curators
 
-1. Curator goes to `otherworldly.ru/studio` and logs in (Google account or email).
+1. Curator goes to `otherworldly.sanity.studio` and logs in (Google account or email).
 2. Left sidebar lists content in Russian: Фестивали · События · Фильмы · Статьи · Галереи · Люди.
 3. She clicks **События → Создать**, fills the form, drags in images, hits **Publish**.
 4. The site updates within seconds — no rebuild, no deploy, no developer.

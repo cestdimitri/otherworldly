@@ -48,6 +48,8 @@ D-001 | 2026-08-02 | Next.js + Sanity over Astro+Decap and Payload
 D-002 | 2026-08-02 | Sanity Studio embedded at /studio, not hosted separately
         Why: one repo, one deploy, one domain, one login. For a four-person team the
         cognitive saving is larger than the architectural cost.
+        ⚠️ SUPERSEDED 8 Aug by D-110 — it does not fit in a 3 MB Worker. No size
+        estimate was ever made when this was decided.
 
 D-003 | 2026-08-02 | Locale as URL sub-path (/ru, /en), not subdomain or separate domain
         Why: single deploy, single sitemap, single certificate, clean hreflang.
@@ -550,4 +552,39 @@ D-108 | 2026-08-07 | No publish webhook until the R2 cache exists
 D-109 | 2026-08-07 | Tilda stays live in parallel — the capture deadline is void
         The before-state is still worth having for the case, but it no longer expires.
         D-106 stands as a record of a deadline that turned out not to exist.
+```
+
+```
+D-110 | 2026-08-08 | Studio moves to Sanity's own hosting — D-002 reversed by a hard limit
+        D-002 put the Studio at /studio: one repo, one deploy, one domain, one login,
+        argued as more valuable to four non-developers than architectural tidiness.
+        It doesn't fit. A Cloudflare Worker is capped at 3 MB; the build came to 18.5 MB
+        because the `sanity` package alone is 22 MB. The paid tier raises the cap to
+        10 MB — so this was never a question of money, and offering to pay would have
+        been useless advice.
+        Removed src/app/studio, added sanity.cli.ts, `npx sanity deploy` →
+        otherworldly.sanity.studio.
+        Honest accounting: the reversal is an improvement. Studio edits no longer require
+        rebuilding the site, and Sanity hosts it free. Two addresses instead of one is the
+        whole cost. But I want it on the record that I did not reason my way here — a
+        deploy failure did, and the original decision had no size estimate behind it at all.
+
+D-111 | 2026-08-08 | Fallback triggers on a successful null, not only on failure
+        Broke the first real build. `q()` degraded to seed data when keys were missing or
+        the request threw — but an empty dataset is neither. The query succeeds and returns
+        null, null passes through as a valid answer, and the page dies dereferencing it.
+        So the code failed in precisely the state it is guaranteed to meet first: a Sanity
+        project that has just been created and is empty. Four pages, one cause.
+        An empty ARRAY is deliberately not a fallback: "no articles yet" is a legitimate
+        answer, and substituting demo data for it would be lying about the dataset.
+
+D-112 | 2026-08-08 | Two data sources must never be mixed within one page
+        Uncovered by D-111. The edition could come from seed while its events were queried
+        from the real dataset, using an id (`seed-2026`) that exists in neither. Result: a
+        demo season with an empty programme — a state that exists in neither reality.
+        Added qWithSource(), which reports where the answer came from. Same fix on the film
+        page, where a work's biography would otherwise have come back empty.
+        Related: /archive/2025 was showing the 2026 season, because the fallback handed
+        back the current edition regardless of the year requested. It lied confidently and
+        invisibly, which is the worst way for a fallback to fail.
 ```

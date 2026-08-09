@@ -1,6 +1,11 @@
 # site — По-ту-сторонний
 
-Next.js 16 (App Router) + Sanity. Студия встроена и живёт на `/studio`.
+Next.js 16 (App Router) + Sanity.
+
+Сайт выкладывается на Cloudflare Workers, админка — на хостинг Sanity
+(`otherworldly.sanity.studio`) отдельной командой. Встроить её в сайт не вышло:
+воркер ограничен 3 МБ, а пакет `sanity` весит 22 МБ. Порядок действий —
+в [`../DEPLOY.md`](../DEPLOY.md).
 
 Дизайн-система — источник истины в `../case/11-specimen/index.html`.
 Решения с номерами `D-nnn` — в `../case/07-process-log.md`.
