@@ -92,11 +92,13 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
 
   // Разделы ниже показываются только если для них есть содержимое:
   // пустой блок с заголовком выглядит как поломка, а не как «пока нет».
+  // ?? [] на каждом: GROQ возвращает null там, где поле не заполнено,
+  // и один незаполненный список не должен ронять сборку всего сайта.
   const [articles, past, curators] = await Promise.all([
-    q<Article[]>(ARTICLES, { locale, limit: 4 }, seedArticles.slice(0, 4)),
-    q<Edition[]>(PAST_EDITIONS, {}, []),
+    q<Article[]>(ARTICLES, { locale, limit: 4 }, seedArticles.slice(0, 4)).then((r) => r ?? []),
+    q<Edition[]>(PAST_EDITIONS, {}, []).then((r) => r ?? []),
     fromSeed ? Promise.resolve([] as Person[])
-             : q<Person[]>(CURATORS, { editionId: edition._id }, []),
+             : q<Person[]>(CURATORS, { editionId: edition._id }, []).then((r) => r ?? []),
   ])
 
   // Фон первого экрана. Кураторка меняет его в админке; пока не загрузила —
@@ -182,7 +184,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         </div>
       </section>
 
-      {articles.length > 0 && (
+      {articles?.length > 0 && (
         <section className={styles.section}>
           <h2 className={`g ${styles.shead}`}>{d.materials}</h2>
           <div className={styles.mats}>
@@ -208,7 +210,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         </section>
       )}
 
-      {curators.length > 0 && (
+      {curators?.length > 0 && (
         <section className={styles.section}>
           <h2 className={`g ${styles.shead}`}>{d.team}</h2>
           <div className={styles.team}>
@@ -228,7 +230,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         </section>
       )}
 
-      {past.length > 0 && (
+      {past?.length > 0 && (
         <section className={styles.section} data-mode="archive">
           <h2 className={`g ${styles.shead}`}>{d.past}</h2>
           <div className="stack">

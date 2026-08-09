@@ -79,8 +79,15 @@ export const PAST_EDITIONS = groq`
   _id, year, title, theme, cities
 }`
 
-/** Кураторки текущего сезона. */
+/**
+ * Кураторки сезона.
+ *
+ * Записано через фильтр по людям, а не через `edition.curators[]->`:
+ * вторая форма возвращает null, если поле у сезона не заполнено, а не
+ * пустой список. Страница ждала массив и падала на сборке.
+ * Эта форма всегда возвращает массив — пустой, если никого не указали.
+ */
 export const CURATORS = groq`
-*[_type=="edition" && _id==$editionId][0].curators[]->{
+*[_type=="person" && _id in *[_type=="edition" && _id==$editionId][0].curators[]._ref]{
   _id, name, role, portrait
 }`
