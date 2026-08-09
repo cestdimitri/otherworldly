@@ -16,8 +16,14 @@ import styles from './page.module.css'
  */
 export const revalidate = 300
 
+/**
+ * Только ЗАКРЫТЫЕ сезоны. Запрос перечислял все подряд, поэтому
+ * будущий сезон 2026 попадал в архив с подписью «Сезон закрыт» —
+ * неверно и по разделу, и по надписи.
+ * Идущий и готовящийся сезоны живут на главной; архив — про прошлое.
+ */
 const ALL_EDITIONS = groq`
-*[_type=="edition"] | order(year desc){
+*[_type=="edition" && status=="archived"] | order(year desc){
   _id, year, title, theme, startDate, endDate, status, vectors, cities
 }`
 
@@ -47,8 +53,8 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
       {editions.length === 0 && (
         <p className={styles.empty}>
           {locale === 'ru'
-            ? 'Сезонов пока нет. Они появятся, когда их заведут в админке.'
-            : 'No seasons yet. They appear once they are added in the studio.'}
+            ? 'Закрытых сезонов пока нет. Текущий сезон — на главной.'
+            : 'No closed seasons yet. The current one is on the homepage.'}
         </p>
       )}
 

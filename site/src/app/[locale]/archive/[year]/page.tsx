@@ -19,17 +19,22 @@ import styles from './page.module.css'
  */
 export const revalidate = 300
 
-const ALL_YEARS = groq`*[_type=="edition" && defined(year)]{ year }`
+const ALL_YEARS = groq`*[_type=="edition" && status=="archived" && defined(year)]{ year }`
 
 export async function generateStaticParams() {
   const rows = await q<{ year: number }[]>(
-    ALL_YEARS, {}, seedArchive.map((e) => ({ year: e.year })),
+    ALL_YEARS, {}, seedArchive.filter((e) => e.status === 'archived').map((e) => ({ year: e.year })),
   )
   return locales.flatMap((locale) => rows.map((r) => ({ locale, year: String(r.year) })))
 }
 
+/**
+ * Тоже только закрытые: иначе /archive/2026 открывался бы напрямую
+ * и показывал будущий сезон как прошедший. Как только сезон закроют
+ * в админке, адрес заработает сам.
+ */
 const EDITION_BY_YEAR = groq`
-*[_type=="edition" && year==$year][0]{
+*[_type=="edition" && status=="archived" && year==$year][0]{
   _id, year, title, theme, startDate, endDate, status, vectors, cities, statement
 }`
 
@@ -60,7 +65,7 @@ export default async function EditionPage({
   // то есть соврал бы уверенно и незаметно.
   const { data: edition, fromSeed } = await qWithSource<Edition | null>(
     EDITION_BY_YEAR, { year: Number(year) },
-    seedArchive.find((e) => e.year === Number(year)) ?? null,
+    seedArchive.find((e) => e.year === Number(year) && e.status === 'archived') ?? null,
   )
   if (!edition) notFound()
 
