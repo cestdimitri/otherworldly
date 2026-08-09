@@ -28,3 +28,7 @@
   .h1{max-width:none}
   .body p{text-align:left}   /* при мере <45 знаков выключка разваливается */
 }
+
+/* Отсылка к внешнему источнику */
+.out{margin-top:8px}
+.outNote{font-size:14px;color:var(--dimmer);margin:0 0 18px}

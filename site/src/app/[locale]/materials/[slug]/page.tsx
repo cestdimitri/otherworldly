@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { q } from '@/sanity/client'
 import { groq } from 'next-sanity'
+import { B } from '@/components/B'
 import { Body } from '@/components/Body'
 import { seedArticles } from '@/lib/seed'
 import { isLocale, locales, type Locale } from '@/lib/i18n'
@@ -23,7 +24,9 @@ const ARTICLE_BY_SLUG = groq`
   cover, body, author->{name}
 }`
 
-const ARTICLE_SLUGS = groq`*[_type=="article" && defined(slug.current)]{
+// Только материалы с СОБСТВЕННЫМ текстом. У внешних публикаций своей
+// страницы нет: карточка в ленте ведёт прямо к источнику.
+const ARTICLE_SLUGS = groq`*[_type=="article" && defined(slug.current) && count(body) > 0]{
   "slug": slug.current, language
 }`
 
@@ -95,14 +98,21 @@ export default async function ArticlePage({
       </div>
 
       <article className={styles.body}>
-        {hasBody ? (
-          <Body value={article.body} />
-        ) : (
-          <p className={styles.lead}>
-            {locale === 'ru'
-              ? 'Текст материала хранится в Sanity как Portable Text и подключается на этом месте.'
-              : 'The article body is stored in Sanity as Portable Text and renders here.'}
-          </p>
+        {hasBody && <Body value={article.body} />}
+
+        {/* Материал опубликован не у нас: вести его полный текст к себе
+            мы не вправе, поэтому страница честно отправляет к источнику. */}
+        {!hasBody && article.externalUrl && (
+          <div className={styles.out}>
+            <p className={styles.outNote}>
+              {locale === 'ru'
+                ? 'Материал опубликован на стороннем ресурсе.'
+                : 'This piece was published elsewhere.'}
+            </p>
+            <B href={article.externalUrl}>
+              {locale === 'ru' ? 'Читать полностью' : 'Read in full'} ↗
+            </B>
+          </div>
         )}
       </article>
     </main>

@@ -189,7 +189,11 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           <h2 className={`g ${styles.shead}`}>{d.materials}</h2>
           <div className={styles.mats}>
             {articles.map((a) => (
-              <Link key={a._id} href={`/${locale}/materials/${a.slug}`}
+              <Link key={a._id}
+                    href={a.externalUrl ?? `/${locale}/materials/${a.slug}`}
+                    {...(a.externalUrl
+                      ? { target: '_blank', rel: 'noopener noreferrer' }
+                      : {})}
                     className={`surface ${styles.mat}`}>
                 <div className={`frame ${styles.cov}`}>
                   {urlFor(a.cover, 800)
@@ -198,7 +202,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
                     : <div className="ph" />}
                 </div>
                 <div className={styles.matBd}>
-                  <div className="k">{a.kind}</div>
+                  <div className="k">{d.kinds[a.kind]}</div>
                   <div className={`g ${styles.matTitle}`}>{a.title}</div>
                 </div>
               </Link>

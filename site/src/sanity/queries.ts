@@ -55,7 +55,7 @@ export const SCREENINGS_OF_FILM = groq`
 
 export const ARTICLES = groq`
 *[_type=="article" && language==$locale] | order(publishedAt desc)[0...$limit]{
-  _id, "slug": slug.current, language, title, kind, dek, publishedAt, externalUrl
+  _id, "slug": slug.current, language, title, kind, dek, publishedAt, externalUrl, cover
 }`
 
 /** Гибкие страницы, отмеченные для меню. Порядок задаёт кураторка, не код. */
