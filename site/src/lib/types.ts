@@ -49,6 +49,11 @@ export type Screening = {
   edition: { year: number; title?: I18n; status: Edition['status'] }
 }
 
-export type Person = { _id: string; name?: string; role?: I18n; portrait?: Img }
+/**
+ * Имя — двуязычное поле, как и роль. В схеме оно объявлено через
+ * i18nString, а здесь стояло строкой: страница выводила объект напрямую
+ * и падала целиком, как только кураторку сохранили в админке.
+ */
+export type Person = { _id: string; name?: I18n; role?: I18n; portrait?: Img }
 
 export type Gallery = { _id: string; title?: I18n; images?: Img[] }

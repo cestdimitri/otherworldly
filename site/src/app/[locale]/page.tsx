@@ -211,7 +211,9 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
                       <img src={urlFor(p.portrait, 600)} alt={p.portrait?.alt ?? ''} />
                     : <div className="ph" />}
                 </div>
-                <div className={`g ${styles.porName}`}>{p.name}</div>
+                <div className={`g ${styles.porName}`} lang={t(p.name, locale).lang}>
+                  {t(p.name, locale).text}
+                </div>
                 <div className={styles.porRole}>{t(p.role, locale).text}</div>
               </div>
             ))}
