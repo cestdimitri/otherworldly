@@ -1,0 +1,24 @@
+.strip{display:flex;gap:2px;overflow-x:auto;scroll-snap-type:x mandatory;
+  scroll-padding-left:0;padding-bottom:4px;
+  /* Полосу прокрутки прячем: лента и так сообщает о себе обрезанным
+     кадром у правого края, а полоса спорит с оформлением. */
+  scrollbar-width:none;-ms-overflow-style:none}
+.strip::-webkit-scrollbar{display:none}
+.strip:focus-visible{outline:1px solid var(--edge);outline-offset:4px}
+
+.shot{position:relative;flex:0 0 auto;margin:0;scroll-snap-align:start;
+  width:min(58vw,460px);aspect-ratio:3/2;overflow:hidden;background:var(--surface)}
+.shot img{display:block;width:100%;height:100%;object-fit:cover;filter:var(--img);
+  transition:transform .8s var(--ease),filter .5s ease}
+.shot:hover img{transform:scale(1.03);filter:grayscale(1) contrast(1.2) brightness(.78)}
+.shot figcaption{position:absolute;left:0;right:0;bottom:0;padding:12px 14px;
+  font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.8));
+  opacity:0;transform:translateY(5px);transition:.3s var(--ease)}
+.shot:hover figcaption{opacity:1;transform:none}
+
+.nav{display:flex;gap:8px;margin-top:22px}
+
+@media(max-width:860px){
+  .shot{width:78vw}
+}

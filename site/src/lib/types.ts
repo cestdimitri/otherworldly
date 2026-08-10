@@ -50,3 +50,5 @@ export type Screening = {
 }
 
 export type Person = { _id: string; name?: string; role?: I18n; portrait?: Img }
+
+export type Gallery = { _id: string; title?: I18n; images?: Img[] }

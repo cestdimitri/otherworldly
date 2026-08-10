@@ -1,13 +1,14 @@
 import { q, qWithSource } from '@/sanity/client'
-import { ARTICLES, CURATORS, CURRENT_EDITION, EVENTS_BY_EDITION, PAST_EDITIONS } from '@/sanity/queries'
+import { ARTICLES, CURATORS, CURRENT_EDITION, EVENTS_BY_EDITION, GALLERY_SHOTS, PAST_EDITIONS } from '@/sanity/queries'
 import { seedArticles, seedEdition, seedEvents } from '@/lib/seed'
 import { now } from '@/lib/now'
 import { dict, isLocale, t, type Locale } from '@/lib/i18n'
-import type { Article, Edition, EventItem, Person } from '@/lib/types'
+import type { Article, Edition, EventItem, Gallery as GalleryDoc, Img, Person } from '@/lib/types'
 import { TicketButton } from '@/components/TicketButton'
 import { urlFor } from '@/sanity/image'
 import Link from 'next/link'
 import { B } from '@/components/B'
+import { Gallery } from '@/components/Gallery'
 import { Reveal } from '@/components/Reveal'
 import { notFound } from 'next/navigation'
 import styles from './page.module.css'
@@ -95,12 +96,17 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   // пустой блок с заголовком выглядит как поломка, а не как «пока нет».
   // ?? [] на каждом: GROQ возвращает null там, где поле не заполнено,
   // и один незаполненный список не должен ронять сборку всего сайта.
-  const [articles, past, curators] = await Promise.all([
+  const [articles, past, curators, galleries] = await Promise.all([
     q<Article[]>(ARTICLES, { locale, limit: 4 }, seedArticles.slice(0, 4)).then((r) => r ?? []),
     q<Edition[]>(PAST_EDITIONS, {}, []).then((r) => r ?? []),
     fromSeed ? Promise.resolve([] as Person[])
              : q<Person[]>(CURATORS, { editionId: edition._id }, []).then((r) => r ?? []),
+    q<GalleryDoc[]>(GALLERY_SHOTS, {}, []).then((r) => r ?? []),
   ])
+
+  // Кадры из всех галерей в одну ленту. Больше двадцати на главной незачем:
+  // это приглашение в галерею, а не сама галерея.
+  const shots: Img[] = galleries.flatMap((g) => g.images ?? []).slice(0, 20)
 
   // Фон первого экрана. Кураторка меняет его в админке; пока не загрузила —
   // берётся файл public/hero.jpg, а если и его нет, остаётся градиент.
@@ -191,6 +197,26 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       </section>
       </Reveal>
 
+      {curators?.length > 0 && (
+        <Reveal><section className={styles.section}>
+          <h2 className={`g ${styles.shead}`}>{d.team}</h2>
+          <div className={styles.team}>
+            {curators.map((p) => (
+              <div key={p._id} className={styles.por}>
+                <div className={`frame ${styles.porIm}`}>
+                  {urlFor(p.portrait, 600)
+                    ? /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={urlFor(p.portrait, 600)} alt={p.portrait?.alt ?? ''} />
+                    : <div className="ph" />}
+                </div>
+                <div className={`g ${styles.porName}`}>{p.name}</div>
+                <div className={styles.porRole}>{t(p.role, locale).text}</div>
+              </div>
+            ))}
+          </div>
+        </section></Reveal>
+      )}
+
       {articles?.length > 0 && (
         <Reveal><section className={styles.section}>
           <h2 className={`g ${styles.shead}`}>{d.materials}</h2>
@@ -221,25 +247,13 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         </section></Reveal>
       )}
 
-      {curators?.length > 0 && (
+      {shots.length > 0 && (
         <Reveal><section className={styles.section}>
-          <h2 className={`g ${styles.shead}`}>{d.team}</h2>
-          <div className={styles.team}>
-            {curators.map((p) => (
-              <div key={p._id} className={styles.por}>
-                <div className={`frame ${styles.porIm}`}>
-                  {urlFor(p.portrait, 600)
-                    ? /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={urlFor(p.portrait, 600)} alt={p.portrait?.alt ?? ''} />
-                    : <div className="ph" />}
-                </div>
-                <div className={`g ${styles.porName}`}>{p.name}</div>
-                <div className={styles.porRole}>{t(p.role, locale).text}</div>
-              </div>
-            ))}
-          </div>
+          <h2 className={`g ${styles.shead}`}>{d.gallery}</h2>
+          <Gallery shots={shots} label={d.gallery} />
         </section></Reveal>
       )}
+
 
       {past?.length > 0 && (
         <Reveal><section className={styles.section} data-mode="archive">

@@ -92,3 +92,13 @@ export const CURATORS = groq`
 *[_type=="person" && _id in *[_type=="edition" && _id==$editionId][0].curators[]._ref]{
   _id, name, role, portrait
 }`
+
+/**
+ * Кадры для галереи на главной. Берём снимки из всех галерей подряд,
+ * свежие сверху: на главной важен не разбор по сезонам, а живое
+ * свидетельство, что фестиваль происходил.
+ */
+export const GALLERY_SHOTS = groq`
+*[_type=="gallery" && count(images) > 0] | order(_createdAt desc){
+  _id, title, images[]{ ..., "alt": alt, "caption": caption }
+}`
