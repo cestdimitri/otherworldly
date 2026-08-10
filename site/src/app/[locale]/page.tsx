@@ -1,5 +1,5 @@
 import { q, qWithSource } from '@/sanity/client'
-import { ARTICLES, CURATORS, CURRENT_EDITION, EVENTS_BY_EDITION, GALLERY_SHOTS, PAST_EDITIONS } from '@/sanity/queries'
+import { ARTICLES, CURATORS, CURATORS_LATEST, CURRENT_EDITION, EVENTS_BY_EDITION, GALLERY_SHOTS, PAST_EDITIONS } from '@/sanity/queries'
 import { seedArticles, seedEdition, seedEvents } from '@/lib/seed'
 import { now } from '@/lib/now'
 import { dict, isLocale, t, type Locale } from '@/lib/i18n'
@@ -100,7 +100,9 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
     q<Article[]>(ARTICLES, { locale, limit: 4 }, seedArticles.slice(0, 4)).then((r) => r ?? []),
     q<Edition[]>(PAST_EDITIONS, {}, []).then((r) => r ?? []),
     fromSeed ? Promise.resolve([] as Person[])
-             : q<Person[]>(CURATORS, { editionId: edition._id }, []).then((r) => r ?? []),
+             : q<Person[]>(CURATORS, { editionId: edition._id }, [])
+                 .then((r) => (r?.length ? r : q<Person[]>(CURATORS_LATEST, {}, [])))
+                 .then((r) => r ?? []),
     q<GalleryDoc[]>(GALLERY_SHOTS, {}, []).then((r) => r ?? []),
   ])
 
