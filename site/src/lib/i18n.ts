@@ -22,13 +22,13 @@ export function t(
 export const dict = {
   ru: {
     tickets: 'Билеты', programme: 'Программа', timetable: 'Расписание',
-    lab: 'Лаборатория', archive: 'Архив', materials: 'Материалы', about: 'О нас',
+    lab: 'Лаборатория', archive: 'Сезоны', materials: 'Материалы', about: 'О нас',
     season: 'Лента сезона', soon: 'Скоро в продаже', daysLeft: 'До фестиваля',
     days: 'дней', projectorOn: 'Проектор включится', min: 'мин',
     strands: { fest: 'Фестиваль', lab: 'Лаборатория', spec: 'Спецпрограмма', echo: 'Эхо' },
     kinds: { interview: 'Интервью', essay: 'Текст', showcase: 'Шоукейс', chronicle: 'Хроника' },
     team: 'Кураторки', past: 'Прошлые сезоны', allMaterials: 'Все материалы',
-    allSeasons: 'Весь архив',
+    allSeasons: 'Все сезоны', running: 'Идёт', closed: 'Сезон закрыт',
     // Описание фестиваля. Постоянное — не привязано к сезону, поэтому
     // живёт здесь, а не в базе. В сезоне лежит его собственное заявление.
     intro: '«По-ту-сторонний» — фестиваль-лаборатория, где кино становится инструментом исследования. Мы соединяем теорию кино с практикой экспериментального кинематографа. Каждый сезон — новые тематические и метафорические векторы, которые развиваются вместе с режиссёрами, зрителями и кураторами',
@@ -36,13 +36,13 @@ export const dict = {
   },
   en: {
     tickets: 'Tickets', programme: 'Programme', timetable: 'Timetable',
-    lab: 'Laboratory', archive: 'Archive', materials: 'Materials', about: 'About',
+    lab: 'Laboratory', archive: 'Seasons', materials: 'Materials', about: 'About',
     season: 'Season', soon: 'On sale soon', daysLeft: 'Festival in',
     days: 'days', projectorOn: 'Projector on', min: 'min',
     strands: { fest: 'Festival', lab: 'Laboratory', spec: 'Special', echo: 'Echo' },
     kinds: { interview: 'Interview', essay: 'Essay', showcase: 'Showcase', chronicle: 'Chronicle' },
     team: 'Curators', past: 'Past seasons', allMaterials: 'All materials',
-    allSeasons: 'Full archive',
+    allSeasons: 'All seasons', running: 'Ongoing', closed: 'Season closed',
     intro: 'Otherworldly is a festival-laboratory where cinema becomes an instrument of research. We join film theory to the practice of experimental cinema. Each season brings new thematic and metaphorical vectors, developed together with directors, audiences and curators',
     phases: { done: 'Finished', now: 'Now', next: 'Ahead' },
   },

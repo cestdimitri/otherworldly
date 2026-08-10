@@ -8,6 +8,7 @@ import { TicketButton } from '@/components/TicketButton'
 import { urlFor } from '@/sanity/image'
 import Link from 'next/link'
 import { B } from '@/components/B'
+import { Reveal } from '@/components/Reveal'
 import { notFound } from 'next/navigation'
 import styles from './page.module.css'
 
@@ -107,7 +108,6 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
 
   const phases = buildPhases(edition, locale, now())
   const days = events.slice(0, 4)
-  const theme = t(edition.theme, locale)
   const statement = t(edition.statement, locale)
 
   return (
@@ -126,22 +126,28 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
             {locale === 'ru' ? <>Независимый<br />кинофестиваль<br />«По-ту-сторонний»</>
                              : <>Independent<br />film festival<br />“Otherworldly”</>}
           </h1>
+          {/* Только даты и город. Название сезона с темой отсюда убрано:
+              на первом экране оно повторяло заголовок и показывало пустые
+              кавычки, когда тема ещё не заполнена. */}
           <div className={`g ${styles.sub}`}>
-            <span>{t(edition.title, locale).text} — «{theme.text}»</span>
-            <i>|</i><span>{dateRange(edition, locale)}</span>
-            <i>|</i><span>{locale === 'ru' ? 'Санкт-Петербург' : 'St. Petersburg'}</span>
+            <span>{dateRange(edition, locale)}</span>
+            <i>|</i><span>{edition.cities?.[0] ?? (locale === 'ru' ? 'Санкт-Петербург' : 'St. Petersburg')}</span>
           </div>
           <p className={styles.lede}>{d.intro}</p>
           {statement.text && (
             <p className={styles.stmt} lang={statement.lang}>{statement.text}</p>
           )}
+          {/* Раньше здесь были две кнопки, ведущие на один адрес.
+              Теперь одна — на страницу сезона. */}
           <div className={styles.cta}>
-            <B href={`/${locale}/timetable`}>{d.tickets}</B>
-            <B href={`/${locale}/timetable`}>{d.timetable}</B>
+            <B href={`/${locale}/archive/${edition.year}`}>
+              {locale === 'ru' ? `Сезон ${edition.year}` : `Season ${edition.year}`}
+            </B>
           </div>
         </div>
       </section>
 
+      <Reveal>
       <section className={styles.section}>
         <h2 className={`g ${styles.shead}`}>{d.season}</h2>
         <div className={styles.tl}>
@@ -183,9 +189,10 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           ))}
         </div>
       </section>
+      </Reveal>
 
       {articles?.length > 0 && (
-        <section className={styles.section}>
+        <Reveal><section className={styles.section}>
           <h2 className={`g ${styles.shead}`}>{d.materials}</h2>
           <div className={styles.mats}>
             {articles.map((a) => (
@@ -211,11 +218,11 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           <div className={styles.more}>
             <B href={`/${locale}/materials`}>{d.allMaterials}</B>
           </div>
-        </section>
+        </section></Reveal>
       )}
 
       {curators?.length > 0 && (
-        <section className={styles.section}>
+        <Reveal><section className={styles.section}>
           <h2 className={`g ${styles.shead}`}>{d.team}</h2>
           <div className={styles.team}>
             {curators.map((p) => (
@@ -231,11 +238,11 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
               </div>
             ))}
           </div>
-        </section>
+        </section></Reveal>
       )}
 
       {past?.length > 0 && (
-        <section className={styles.section} data-mode="archive">
+        <Reveal><section className={styles.section} data-mode="archive">
           <h2 className={`g ${styles.shead}`}>{d.past}</h2>
           <div className="stack">
             {past.map((e) => (
@@ -252,7 +259,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           <div className={styles.more}>
             <B href={`/${locale}/archive`}>{d.allSeasons}</B>
           </div>
-        </section>
+        </section></Reveal>
       )}
     </main>
   )

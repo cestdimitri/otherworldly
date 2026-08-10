@@ -1,4 +1,4 @@
-.wrap{max-width:1320px;margin:0 auto;padding:120px 40px 110px}
+.wrap{max-width:1320px;margin:0 auto;padding:120px var(--page-pad) 110px}
 .h1{font-weight:600;font-size:clamp(30px,5vw,54px);letter-spacing:-.015em;
   text-transform:uppercase;margin:0;line-height:1.06}
 .meta{font-size:12.5px;color:var(--dim);margin-top:12px}

@@ -2,7 +2,7 @@
 
 /* ═══ ПЕРВЫЙ ЭКРАН ═══ */
 .hero{position:relative;min-height:100vh;display:flex;flex-direction:column;
-  justify-content:flex-end;padding:44px 44px 46px;overflow:hidden}
+  justify-content:flex-end;padding:44px var(--page-pad) 46px;overflow:hidden}
 .plate{position:absolute;inset:0;z-index:0;filter:var(--img);
   background:radial-gradient(118% 88% at 50% 6%,#75757C 0%,#3C3C43 33%,#17171B 68%,#0A0A0C 100%)}
 /* Фотография вместо градиента. Тот же фильтр, что и у всех изображений
@@ -19,7 +19,7 @@
     transparent 345deg,rgba(255,255,255,.10) 349deg,rgba(255,255,255,.42) 356deg,transparent 360deg)}
 .vig{position:absolute;inset:0;z-index:2;pointer-events:none;
   background:radial-gradient(128% 98% at 50% 20%,transparent 34%,#08080A 100%)}
-.heroIn{position:relative;z-index:4}
+.heroIn{position:relative;z-index:4;max-width:var(--page-max);margin:0 auto;width:100%}
 .wordmark{font-weight:600;font-size:clamp(30px,5.4vw,74px);line-height:.98;
   letter-spacing:-.035em;text-transform:uppercase;margin:0;
   filter:drop-shadow(0 0 26px rgba(242,242,244,.34)) drop-shadow(0 0 3px rgba(242,242,244,.5))}
@@ -32,7 +32,7 @@
 .cta{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap}
 
 /* ═══ ЛЕНТА СЕЗОНА ═══ */
-.section{padding:0 44px;margin-top:120px}
+.section{max-width:var(--page-max);margin:120px auto 0;padding:0 var(--page-pad)}
 .shead{font-weight:500;font-size:12px;letter-spacing:.16em;text-transform:uppercase;
   color:var(--dimmer);margin:0 0 52px}
 

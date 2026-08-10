@@ -17,13 +17,12 @@ import styles from './page.module.css'
 export const revalidate = 300
 
 /**
- * Только ЗАКРЫТЫЕ сезоны. Запрос перечислял все подряд, поэтому
- * будущий сезон 2026 попадал в архив с подписью «Сезон закрыт» —
- * неверно и по разделу, и по надписи.
- * Идущий и готовящийся сезоны живут на главной; архив — про прошлое.
+ * Все сезоны. Раздел называется «Сезоны», а не «Архив», поэтому текущий
+ * тоже здесь: иначе его страницу негде было найти. Различает их подпись,
+ * а не наличие в списке.
  */
 const ALL_EDITIONS = groq`
-*[_type=="edition" && status=="archived"] | order(year desc){
+*[_type=="edition"] | order(year desc){
   _id, year, title, theme, startDate, endDate, status, vectors, cities
 }`
 
@@ -53,14 +52,16 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
       {editions.length === 0 && (
         <p className={styles.empty}>
           {locale === 'ru'
-            ? 'Закрытых сезонов пока нет. Текущий сезон — на главной.'
-            : 'No closed seasons yet. The current one is on the homepage.'}
+            ? 'Сезонов пока нет. Они появятся, когда их заведут в админке.'
+            : 'No seasons yet. They appear once they are added in the studio.'}
         </p>
       )}
 
       <div className="stack" style={{ marginTop: 44 }}>
         {editions.map((e) => {
-          const live = e.status === 'current'
+          // «Идёт» — у любого незакрытого сезона: он и есть тот, о котором
+          // сайт рассказывает сейчас.
+          const live = e.status !== 'archived'
           const title = t(e.title, locale)
           return (
             <Link key={e._id} href={`/${locale}/archive/${e.year}`}
@@ -68,7 +69,7 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
               <div className={`g ${styles.yr}`}>{e.year}</div>
               <div>
                 <div className="k">
-                  {live ? d.phases.now : locale === 'ru' ? 'Сезон закрыт' : 'Season closed'}
+                  {live ? d.running : d.closed}
                 </div>
                 <h2 className={`g ${styles.title}`} lang={title.lang}>{title.text}</h2>
                 <div className={styles.vec}>{t(e.theme, locale).text}</div>

@@ -1,8 +1,8 @@
-.f{margin-top:120px;padding:0 40px 34px;
+.f{margin-top:120px;padding:0 var(--page-pad) 34px;
   /* Одна световая кромка вместо рамки: разделителей в системе нет,
      но подвал должен отделяться от страницы. */
   box-shadow:inset 0 1px 0 var(--edge)}
-.in{max-width:1180px;margin:0 auto;padding:46px 0 34px;
+.in{max-width:var(--page-max);margin:0 auto;padding:46px 0 34px;
   display:grid;grid-template-columns:1fr auto auto;gap:44px;align-items:start}
 
 .left{min-width:0}
@@ -15,7 +15,7 @@
 .nav a{font-size:13px;color:var(--dim);text-decoration:none;transition:.24s;white-space:nowrap}
 .nav a:hover{color:var(--ink);text-shadow:var(--glow-1)}
 
-.base{max-width:1180px;margin:0 auto;padding-top:22px;
+.base{max-width:var(--page-max);margin:0 auto;padding-top:22px;
   display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
   font-size:11px;letter-spacing:.05em;color:var(--dimmer);
   box-shadow:inset 0 1px 0 var(--edge)}

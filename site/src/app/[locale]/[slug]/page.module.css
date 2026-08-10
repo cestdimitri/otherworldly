@@ -1,6 +1,6 @@
 /* Мера и типографика те же, что у материала: это тоже страница, где текст —
    предмет, а не подпись. Отдельного набора правил заводить незачем. */
-.wrap{max-width:1180px;margin:0 auto;padding:120px 40px 120px}
+.wrap{max-width:var(--page-max);margin:0 auto;padding:120px var(--page-pad) 120px}
 .h1{font-weight:600;font-size:clamp(30px,5vw,58px);letter-spacing:-.02em;
   margin:0;line-height:1.08;max-width:17ch}
 .lead{font-size:19px;line-height:1.62;color:var(--ink);margin:22px 0 0;max-width:54ch}
