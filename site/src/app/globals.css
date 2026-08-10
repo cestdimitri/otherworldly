@@ -109,10 +109,9 @@ body[data-mode="archive"]{
 .frame{position:relative;overflow:hidden;background:var(--surface)}
 .frame img,.frame .ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
   filter:var(--img);transition:transform .7s var(--ease)}
-.frame::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.3;
-  mix-blend-mode:overlay;
-  background-image:radial-gradient(rgba(0,0,0,.9) 1px,transparent 1.2px);
-  background-size:4px 4px}
+/* Растровая сетка поверх кадров убрана: она читалась как дефект печати
+   на самой фотографии, а не как приём. Обесцвечивание в --img остаётся —
+   оно держит изображения в одной тональности со страницей. */
 a:hover .frame img,a:hover .frame .ph{transform:scale(1.05)}
 
 /* ═══ ДОК ═══

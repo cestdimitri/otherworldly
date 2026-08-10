@@ -54,6 +54,9 @@ export type Screening = {
  * i18nString, а здесь стояло строкой: страница выводила объект напрямую
  * и падала целиком, как только кураторку сохранили в админке.
  */
-export type Person = { _id: string; name?: I18n; role?: I18n; portrait?: Img }
+export type Person = {
+  _id: string; name?: I18n; role?: I18n; bio?: I18n
+  links?: string[]; portrait?: Img
+}
 
 export type Gallery = { _id: string; title?: I18n; images?: Img[] }

@@ -1,8 +1,9 @@
 'use client'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { urlFor } from '@/sanity/image'
 import type { Img } from '@/lib/types'
 import { B } from './B'
+import { Overlay } from './Overlay'
 import styles from './Gallery.module.css'
 
 /**
@@ -17,6 +18,7 @@ import styles from './Gallery.module.css'
  */
 export function Gallery({ shots, label }: { shots: Img[]; label: string }) {
   const ref = useRef<HTMLDivElement>(null)
+  const [open, setOpen] = useState<Img | null>(null)
 
   const scroll = (dir: 1 | -1) => {
     const el = ref.current
@@ -33,8 +35,11 @@ export function Gallery({ shots, label }: { shots: Img[]; label: string }) {
           if (!src) return null
           return (
             <figure key={i} className={styles.shot}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={src} alt={im.alt ?? ''} loading="lazy" />
+              <button className={styles.hit} onClick={() => setOpen(im)}
+                      aria-label={im.alt || 'Открыть кадр'}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={src} alt={im.alt ?? ''} loading="lazy" />
+              </button>
               {im.caption && <figcaption>{im.caption}</figcaption>}
             </figure>
           )
@@ -45,6 +50,23 @@ export function Gallery({ shots, label }: { shots: Img[]; label: string }) {
         <B sm onClick={() => scroll(-1)} aria-label="Назад"><span>←</span></B>
         <B sm onClick={() => scroll(1)} aria-label="Вперёд"><span>→</span></B>
       </div>
+
+      <Overlay open={Boolean(open)} onClose={() => setOpen(null)}
+               label={open?.alt || 'Кадр'}>
+        {open && (
+          <figure className={styles.big}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={urlFor(open, 2000)} alt={open.alt ?? ''} />
+            {(open.caption || open.credit) && (
+              <figcaption>
+                {open.caption}
+                {open.caption && open.credit ? ' — ' : ''}
+                {open.credit}
+              </figcaption>
+            )}
+          </figure>
+        )}
+      </Overlay>
     </>
   )
 }

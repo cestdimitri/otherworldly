@@ -8,6 +8,7 @@ import { TicketButton } from '@/components/TicketButton'
 import { urlFor } from '@/sanity/image'
 import Link from 'next/link'
 import { B } from '@/components/B'
+import { Curators } from '@/components/Curators'
 import { Gallery } from '@/components/Gallery'
 import { Reveal } from '@/components/Reveal'
 import { notFound } from 'next/navigation'
@@ -202,22 +203,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       {curators?.length > 0 && (
         <Reveal><section className={styles.section}>
           <h2 className={`g ${styles.shead}`}>{d.team}</h2>
-          <div className={styles.team}>
-            {curators.map((p) => (
-              <div key={p._id} className={styles.por}>
-                <div className={`frame ${styles.porIm}`}>
-                  {urlFor(p.portrait, 600)
-                    ? /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={urlFor(p.portrait, 600)} alt={p.portrait?.alt ?? ''} />
-                    : <div className="ph" />}
-                </div>
-                <div className={`g ${styles.porName}`} lang={t(p.name, locale).lang}>
-                  {t(p.name, locale).text}
-                </div>
-                <div className={styles.porRole}>{t(p.role, locale).text}</div>
-              </div>
-            ))}
-          </div>
+          <Curators people={curators} locale={locale} />
         </section></Reveal>
       )}
 

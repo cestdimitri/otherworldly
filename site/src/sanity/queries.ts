@@ -89,7 +89,7 @@ export const PAST_EDITIONS = groq`
  */
 export const CURATORS = groq`
 *[_type=="person" && _id in *[_type=="edition" && _id==$editionId][0].curators[]._ref]{
-  _id, name, role, portrait
+  _id, name, role, bio, links, portrait
 }`
 
 /**
@@ -103,7 +103,7 @@ export const CURATORS = groq`
 export const CURATORS_LATEST = groq`
 *[_type=="person" && _id in (
   *[_type=="edition" && count(curators) > 0] | order(year desc)[0].curators[]._ref
-)]{ _id, name, role, portrait }`
+)]{ _id, name, role, bio, links, portrait }`
 
 /**
  * Кадры для галереи на главной. Берём снимки из всех галерей подряд,
